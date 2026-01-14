@@ -2,6 +2,6 @@
 <Project>
 
   <!-- Import copy to core target for all projects -->
-  <Import Project="$(MSBuildThisFileDirectory)build\EnoModLoader.CopyToCore.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)build\EnoUnityLoader.CopyToCore.targets" />
 
 </Project>

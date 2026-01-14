@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 using HarmonyLib;
 
-namespace EnoModLoader.Preloader.RuntimeFixes;
+namespace EnoUnityLoader.Preloader.RuntimeFixes;
 
 /// <summary>
 ///     Fixes Console.SetOut to redirect to ModLoader logging.

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 ///     Logs entries to a file on disk.

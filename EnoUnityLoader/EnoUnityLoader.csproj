@@ -1,10 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>
+        <!-- Assembly version -->
+        <Version>1.0.0</Version>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+
+        <!-- Copy all DLLs including dependencies to core folder -->
+        <CopyAllDependenciesToCore>true</CopyAllDependenciesToCore>
+        <!-- Ensure NuGet dependencies are copied to output folder -->
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <LangVersion>latest</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AssetRipper.Primitives" Version="3.2.0" />
+      <PackageReference Include="enopm.harmonyx" Version="2.16.0" />
+      <PackageReference Include="enopm.il2cppinterop.generator" Version="1.5.1" />
+      <PackageReference Include="enopm.il2cppinterop.harmonysupport" Version="1.5.1" />
+      <PackageReference Include="enopm.il2cppinterop.runtime" Version="1.5.1" />
+      <PackageReference Include="Iced" Version="1.21.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
+      <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+      <PackageReference Include="Samboy063.Cpp2IL.Core" Version="2022.1.0-pre-release.20" />
+      <PackageReference Include="SemanticVersioning" Version="3.0.0" />
+    </ItemGroup>
+
+    <!-- Reference interop assemblies for UnityEngine/Il2CppSystem types -->
+    <ItemGroup>
+        <Reference Include="$(SolutionDir)InteropLibs\UnityEngine.CoreModule.dll" Private="false" />
+        <Reference Include="$(SolutionDir)InteropLibs\Il2Cppmscorlib.dll" Private="false" />
+    </ItemGroup>
 
 </Project>

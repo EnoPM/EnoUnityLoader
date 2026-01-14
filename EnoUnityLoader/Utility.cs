@@ -7,10 +7,10 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Security.Cryptography;
 using System.Text;
-using EnoModLoader.AssemblyLoading;
+using EnoUnityLoader.AssemblyLoading;
 using Mono.Cecil;
 
-namespace EnoModLoader;
+namespace EnoUnityLoader;
 
 /// <summary>
 /// Generic helper properties and methods.

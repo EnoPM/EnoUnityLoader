@@ -2,10 +2,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using EnoModLoader.AssemblyLoading;
-using EnoModLoader.Preloader;
+using EnoUnityLoader.AssemblyLoading;
+using EnoUnityLoader.Preloader;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 internal static class UnityPreloadRunner
 {

@@ -1,8 +1,8 @@
 using System;
 using System.ComponentModel;
-using EnoModLoader.Configuration;
+using EnoUnityLoader.Configuration;
 
-namespace EnoModLoader.Preloader.RuntimeFixes;
+namespace EnoUnityLoader.Preloader.RuntimeFixes;
 
 /// <summary>
 ///     Configures the Harmony/MonoMod backend based on configuration.

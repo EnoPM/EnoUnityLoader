@@ -6,7 +6,7 @@
 using System;
 using System.Text;
 
-namespace EnoModLoader.Console.Windows.ConsoleEncoding;
+namespace EnoUnityLoader.Console.Windows.ConsoleEncoding;
 
 // --------------------------------------------------
 // Code ported from
@@ -30,18 +30,18 @@ internal partial class ConsoleEncoding : Encoding
 
     public static uint ConsoleCodePage
     {
-        get => ConsoleEncoding.GetConsoleOutputCP();
-        set => ConsoleEncoding.SetConsoleOutputCP(value);
+        get => GetConsoleOutputCP();
+        set => SetConsoleOutputCP(value);
     }
 
-    public static uint GetActiveCodePage() => ConsoleEncoding.GetACP();
+    public static uint GetActiveCodePage() => GetACP();
 
     public static ConsoleEncoding GetEncoding(uint codePage) => new(codePage);
 
     public override int GetByteCount(char[] chars, int index, int count)
     {
         WriteCharBuffer(chars, index, count);
-        var result = ConsoleEncoding.WideCharToMultiByte(_codePage, 0, chars, count, _zeroByte, 0, IntPtr.Zero, IntPtr.Zero);
+        var result = WideCharToMultiByte(_codePage, 0, chars, count, _zeroByte, 0, IntPtr.Zero, IntPtr.Zero);
         return result;
     }
 
@@ -50,7 +50,7 @@ internal partial class ConsoleEncoding : Encoding
         var byteCount = GetByteCount(chars, charIndex, charCount);
         WriteCharBuffer(chars, charIndex, charCount);
         ExpandByteBuffer(byteCount);
-        _ = ConsoleEncoding.WideCharToMultiByte(_codePage, 0, chars, charCount, _byteBuffer, byteCount, IntPtr.Zero,
+        _ = WideCharToMultiByte(_codePage, 0, chars, charCount, _byteBuffer, byteCount, IntPtr.Zero,
                                 IntPtr.Zero);
         var readCount = Math.Min(bytes.Length, byteCount);
         ReadByteBuffer(bytes, byteIndex, readCount);
@@ -60,7 +60,7 @@ internal partial class ConsoleEncoding : Encoding
     public override int GetCharCount(byte[] bytes, int index, int count)
     {
         WriteByteBuffer(bytes, index, count);
-        var result = ConsoleEncoding.MultiByteToWideChar(_codePage, 0, bytes, count, _zeroChar, 0);
+        var result = MultiByteToWideChar(_codePage, 0, bytes, count, _zeroChar, 0);
         return result;
     }
 
@@ -69,7 +69,7 @@ internal partial class ConsoleEncoding : Encoding
         var charCount = GetCharCount(bytes, byteIndex, byteCount);
         WriteByteBuffer(bytes, byteIndex, byteCount);
         ExpandCharBuffer(charCount);
-        _ = ConsoleEncoding.MultiByteToWideChar(_codePage, 0, bytes, byteCount, _charBuffer, charCount);
+        _ = MultiByteToWideChar(_codePage, 0, bytes, byteCount, _charBuffer, charCount);
         var readCount = Math.Min(chars.Length, charCount);
         ReadCharBuffer(chars, charIndex, readCount);
         return readCount;

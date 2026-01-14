@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using EnoModLoader.Configuration;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.Preloader;
+namespace EnoUnityLoader.Preloader;
 
 /// <summary>
 ///     Log listener that listens to logs during preloading time and buffers messages for output in Unity logs later.

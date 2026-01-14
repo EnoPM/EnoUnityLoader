@@ -1,6 +1,6 @@
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.Preloader;
+namespace EnoUnityLoader.Preloader;
 
 /// <summary>
 ///     Static log source for preloader messages.

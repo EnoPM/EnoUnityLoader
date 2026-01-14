@@ -6,15 +6,15 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using EnoModLoader.AssemblyLoading;
-using EnoModLoader.Attributes;
-using EnoModLoader.Configuration;
-using EnoModLoader.Console;
-using EnoModLoader.Contract;
-using EnoModLoader.Logging;
+using EnoUnityLoader.AssemblyLoading;
+using EnoUnityLoader.Attributes;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Console;
+using EnoUnityLoader.Contract;
+using EnoUnityLoader.Logging;
 using Mono.Cecil;
 
-namespace EnoModLoader.Bootstrap;
+namespace EnoUnityLoader.Bootstrap;
 
 /// <summary>
 ///     Base chain loader for loading ModLoader plugins.

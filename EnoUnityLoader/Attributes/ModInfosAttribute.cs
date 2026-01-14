@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using EnoModLoader.Contract;
+using EnoUnityLoader.Contract;
 using Mono.Cecil;
 
-namespace EnoModLoader.Attributes;
+namespace EnoUnityLoader.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ModInfosAttribute(string guid, string name, string version) : Attribute

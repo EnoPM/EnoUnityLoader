@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.IL2CPP.Funchook;
+namespace EnoUnityLoader.IL2CPP.Funchook;
 
 internal enum FunchookResult
 {

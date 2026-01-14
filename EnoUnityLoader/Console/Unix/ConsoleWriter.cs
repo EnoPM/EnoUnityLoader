@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using HarmonyLib;
 
-namespace EnoModLoader.Console.Unix;
+namespace EnoUnityLoader.Console.Unix;
 
 internal static class ConsoleWriter
 {

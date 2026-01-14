@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Specify the range of acceptable values for a setting.

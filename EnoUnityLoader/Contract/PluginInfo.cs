@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnoModLoader.Attributes;
-using EnoModLoader.Bootstrap;
+using EnoUnityLoader.Attributes;
+using EnoUnityLoader.Bootstrap;
 
-namespace EnoModLoader.Contract;
+namespace EnoUnityLoader.Contract;
 
 /// <summary>
 ///     Data class that represents information about a loadable ModLoader plugin.

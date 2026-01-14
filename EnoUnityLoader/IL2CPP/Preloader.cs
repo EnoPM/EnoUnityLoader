@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using EnoModLoader.Console;
-using EnoModLoader.IL2CPP.RuntimeFixes;
-using EnoModLoader.Logging;
-using EnoModLoader.Preloader;
-using EnoModLoader.Preloader.Patching;
-using EnoModLoader.Preloader.RuntimeFixes;
-using EnoModLoader.Unity;
+using EnoUnityLoader.Console;
+using EnoUnityLoader.IL2CPP.RuntimeFixes;
+using EnoUnityLoader.Logging;
+using EnoUnityLoader.Preloader;
+using EnoUnityLoader.Preloader.Patching;
+using EnoUnityLoader.Preloader.RuntimeFixes;
+using EnoUnityLoader.Unity;
+using AssemblyPatcher = EnoUnityLoader.Preloader.Patching.AssemblyPatcher;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 /// <summary>
 ///     IL2CPP preloader.

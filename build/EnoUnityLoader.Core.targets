@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Targets for EnoModLoader core assemblies.
-  Import this alongside EnoModLoader.Core.props.
+  Targets for EnoUnityLoader core assemblies.
+  Import this alongside EnoUnityLoader.Core.props.
 -->
 <Project>
 
-  <Import Project="$(MSBuildThisFileDirectory)EnoModLoader.CopyToCore.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)EnoUnityLoader.CopyToCore.targets" />
 
 </Project>

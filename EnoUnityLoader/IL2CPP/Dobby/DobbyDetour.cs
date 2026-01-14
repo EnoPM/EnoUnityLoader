@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.IL2CPP.Dobby;
+namespace EnoUnityLoader.IL2CPP.Dobby;
 
 internal class DobbyDetour : BaseNativeDetour<DobbyDetour>
 {

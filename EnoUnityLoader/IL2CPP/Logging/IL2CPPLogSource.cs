@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.IL2CPP.Logging;
+namespace EnoUnityLoader.IL2CPP.Logging;
 
 public class IL2CPPLogSource : ILogSource
 {

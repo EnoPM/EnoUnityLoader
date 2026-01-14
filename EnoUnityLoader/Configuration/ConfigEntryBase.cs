@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Provides access to a single setting inside of a <see cref="ConfigFile" />.

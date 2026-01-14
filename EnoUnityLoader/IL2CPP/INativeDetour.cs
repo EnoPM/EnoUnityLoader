@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using EnoModLoader.Configuration;
-using EnoModLoader.IL2CPP.Dobby;
-using EnoModLoader.IL2CPP.Funchook;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.IL2CPP.Dobby;
+using EnoUnityLoader.IL2CPP.Funchook;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 /// <summary>
 /// Interface for native detours. Replaces MonoMod.RuntimeDetour.IDetour for .NET 10 compatibility.

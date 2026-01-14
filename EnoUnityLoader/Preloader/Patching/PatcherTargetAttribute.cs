@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Preloader.Patching;
+namespace EnoUnityLoader.Preloader.Patching;
 
 /// <summary>
 /// Specifies which assemblies a patcher should target.

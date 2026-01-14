@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Mono.Cecil;
 
-namespace EnoModLoader.Preloader.Patching;
+namespace EnoUnityLoader.Preloader.Patching;
 
 /// <summary>
 ///     A definition of an individual patch for use by <see cref="AssemblyPatcher" />.

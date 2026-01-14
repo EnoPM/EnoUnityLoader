@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace EnoModLoader.IL2CPP.Utils.Collections;
+namespace EnoUnityLoader.IL2CPP.Utils.Collections;
 
 public class ManagedIl2CppEnumerable : IEnumerable
 {

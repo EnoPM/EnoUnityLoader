@@ -1,8 +1,8 @@
 using System.IO;
 using System.Runtime.InteropServices;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.IL2CPP.RuntimeFixes;
+namespace EnoUnityLoader.IL2CPP.RuntimeFixes;
 
 internal static class RedirectStdErrFix
 {

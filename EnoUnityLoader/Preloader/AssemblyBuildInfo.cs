@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Mono.Cecil;
 
-namespace EnoModLoader.Preloader;
+namespace EnoUnityLoader.Preloader;
 
 /// <summary>
 ///     Information about an assembly's build configuration.

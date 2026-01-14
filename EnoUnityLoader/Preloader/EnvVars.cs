@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace EnoModLoader.Preloader;
+namespace EnoUnityLoader.Preloader;
 
 /// <summary>
 ///     Doorstop environment variables, passed into the ModLoader preloader.

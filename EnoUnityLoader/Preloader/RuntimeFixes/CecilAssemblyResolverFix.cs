@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Mono.Cecil;
 
-namespace EnoModLoader.Preloader.RuntimeFixes;
+namespace EnoUnityLoader.Preloader.RuntimeFixes;
 
 /// <summary>
 /// Configures Cecil's assembly resolver to find .NET 10 runtime assemblies.

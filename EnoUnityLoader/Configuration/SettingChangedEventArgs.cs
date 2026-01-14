@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Arguments for events concerning a change of a setting.

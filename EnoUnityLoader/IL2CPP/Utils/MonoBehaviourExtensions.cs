@@ -1,8 +1,8 @@
 using System.Collections;
-using EnoModLoader.IL2CPP.Utils.Collections;
+using EnoUnityLoader.IL2CPP.Utils.Collections;
 using UnityEngine;
 
-namespace EnoModLoader.IL2CPP.Utils;
+namespace EnoUnityLoader.IL2CPP.Utils;
 
 public static class MonoBehaviourExtensions
 {

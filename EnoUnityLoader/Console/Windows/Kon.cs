@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.Console.Windows;
+namespace EnoUnityLoader.Console.Windows;
 
 internal class Kon
 {

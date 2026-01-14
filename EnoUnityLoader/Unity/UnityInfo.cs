@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using AssetRipper.Primitives;
 
-namespace EnoModLoader.Unity;
+namespace EnoUnityLoader.Unity;
 
 /// <summary>
 ///     Various information about the currently executing Unity player.

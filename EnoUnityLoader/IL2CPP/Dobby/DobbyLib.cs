@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.IL2CPP.Dobby;
+namespace EnoUnityLoader.IL2CPP.Dobby;
 
 internal static unsafe class DobbyLib
 {

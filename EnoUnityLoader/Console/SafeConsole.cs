@@ -6,7 +6,7 @@
 using System;
 using System.Reflection;
 
-namespace EnoModLoader.Console;
+namespace EnoUnityLoader.Console;
 
 /// <summary>
 /// Console class with safe handlers for Unity 4.x, which does not have a proper Console implementation

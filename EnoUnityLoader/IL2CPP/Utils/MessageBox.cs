@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.IL2CPP.Utils;
+namespace EnoUnityLoader.IL2CPP.Utils;
 
 internal static class MessageBox
 {

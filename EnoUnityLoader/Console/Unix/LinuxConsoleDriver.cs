@@ -1,10 +1,10 @@
 using System;
 using System.IO;
-using EnoModLoader.Configuration;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Logging;
 using HarmonyLib;
 
-namespace EnoModLoader.Console.Unix;
+namespace EnoUnityLoader.Console.Unix;
 
 internal class LinuxConsoleDriver : IConsoleDriver
 {

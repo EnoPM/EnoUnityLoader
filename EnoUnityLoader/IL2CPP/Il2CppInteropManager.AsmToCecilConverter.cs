@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 internal static partial class Il2CppInteropManager
 {

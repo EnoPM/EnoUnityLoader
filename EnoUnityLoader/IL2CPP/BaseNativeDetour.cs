@@ -1,13 +1,13 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 internal abstract class BaseNativeDetour<T> : INativeDetour where T : BaseNativeDetour<T>
 {
-    protected static readonly ManualLogSource Logger = EnoModLoader.Logging.Logger.CreateLogSource(typeof(T).Name);
+    protected static readonly ManualLogSource Logger = EnoUnityLoader.Logging.Logger.CreateLogSource(typeof(T).Name);
 
     protected BaseNativeDetour(nint originalMethodPtr, Delegate detourMethod)
     {

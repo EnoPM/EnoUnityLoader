@@ -2,10 +2,10 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace EnoModLoader.Logging.Interpolation;
+namespace EnoUnityLoader.Logging.Interpolation;
 
 /// <summary>
-/// Interpolated string handler for ModLoader <see cref="Logging.Logger" />. This allows to conditionally skip logging certain
+/// Interpolated string handler for ModLoader <see cref="Logger" />. This allows to conditionally skip logging certain
 /// messages and speed up logging in certain places.
 /// </summary>
 /// <remarks>

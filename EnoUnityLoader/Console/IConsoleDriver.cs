@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace EnoModLoader.Console;
+namespace EnoUnityLoader.Console;
 
 internal interface IConsoleDriver
 {

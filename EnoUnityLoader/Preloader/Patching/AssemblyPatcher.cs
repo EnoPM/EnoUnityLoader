@@ -7,15 +7,15 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.RegularExpressions;
-using EnoModLoader.AssemblyLoading;
-using EnoModLoader.Bootstrap;
-using EnoModLoader.Configuration;
-using EnoModLoader.Contract;
-using EnoModLoader.Logging;
+using EnoUnityLoader.AssemblyLoading;
+using EnoUnityLoader.Bootstrap;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Contract;
+using EnoUnityLoader.Logging;
 using HarmonyLib;
 using Mono.Cecil;
 
-namespace EnoModLoader.Preloader.Patching;
+namespace EnoUnityLoader.Preloader.Patching;
 
 /// <summary>
 ///     Worker class which is used for loading and patching entire folders of assemblies, or alternatively patching and
@@ -40,7 +40,7 @@ public partial class AssemblyPatcher(Func<byte[], string, Assembly> assemblyLoad
     /// </summary>
     private IEnumerable<BasePatcher> PatcherPluginsSafe => PatcherContext.PatcherPlugins.ToList();
 
-    private ManualLogSource Logger { get; } = Logging.Logger.CreateLogSource("AssemblyPatcher");
+    private ManualLogSource Logger { get; } = EnoUnityLoader.Logging.Logger.CreateLogSource("AssemblyPatcher");
 
     [GeneratedRegex(@"^[a-zA-Z0-9\._\-]+$")]
     private static partial Regex AllowedGuidRegex();

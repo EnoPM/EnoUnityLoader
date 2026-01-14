@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Base type of all classes representing and enforcing acceptable values of config settings.

@@ -2,10 +2,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using EnoModLoader;
-using EnoModLoader.IL2CPP;
-using EnoModLoader.IL2CPP.Utils;
-using EnoModLoader.Preloader;
+using EnoUnityLoader;
+using EnoUnityLoader.IL2CPP;
+using EnoUnityLoader.IL2CPP.Utils;
+using EnoUnityLoader.Preloader;
 
 // ReSharper disable once CheckNamespace
 namespace Doorstop;

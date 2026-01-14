@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.Console.Unix;
+namespace EnoUnityLoader.Console.Unix;
 
 internal class UnixStream : Stream
 {

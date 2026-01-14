@@ -1,6 +1,6 @@
 using Il2CppSystem.Collections;
 
-namespace EnoModLoader.IL2CPP.Utils.Collections;
+namespace EnoUnityLoader.IL2CPP.Utils.Collections;
 
 public static class CollectionExtensions
 {

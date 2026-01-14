@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace EnoModLoader.Bootstrap;
+namespace EnoUnityLoader.Bootstrap;
 
 /// <summary>
 /// Interface for objects that can be cached to a binary format.

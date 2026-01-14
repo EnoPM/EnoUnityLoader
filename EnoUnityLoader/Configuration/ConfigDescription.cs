@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Metadata of a <see cref="ConfigEntryBase" />.

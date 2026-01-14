@@ -6,7 +6,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.Console.Windows.ConsoleEncoding;
+namespace EnoUnityLoader.Console.Windows.ConsoleEncoding;
 
 // --------------------------------------------------
 // Code ported from

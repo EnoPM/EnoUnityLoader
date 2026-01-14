@@ -2,22 +2,22 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using EnoModLoader.Bootstrap;
-using EnoModLoader.Configuration;
-using EnoModLoader.Contract;
-using EnoModLoader.IL2CPP.Logging;
-using EnoModLoader.IL2CPP.Utils;
-using EnoModLoader.Logging;
-using EnoModLoader.Preloader;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Contract;
+using EnoUnityLoader.IL2CPP.Logging;
+using EnoUnityLoader.IL2CPP.Utils;
+using EnoUnityLoader.Logging;
+using EnoUnityLoader.Preloader;
 using Il2CppInterop.Runtime.InteropTypes;
 using UnityEngine;
+using Logger = EnoUnityLoader.Logging.Logger;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 /// <summary>
 ///     The IL2CPP chainloader.
 /// </summary>
-public class IL2CPPChainLoader : BaseChainLoader<BasePlugin>
+public class IL2CPPChainLoader : EnoUnityLoader.Bootstrap.BaseChainLoader<BasePlugin>
 {
     private static RuntimeInvokeDetourDelegate? originalInvoke;
 
@@ -66,7 +66,7 @@ public class IL2CPPChainLoader : BaseChainLoader<BasePlugin>
 
         if (!NativeLibrary.TryLoad("GameAssembly", typeof(IL2CPPChainLoader).Assembly, null, out var il2CppHandle))
         {
-            EnoModLoader.Logging.Logger.Log(LogLevel.Fatal,
+            Logger.Log(LogLevel.Fatal,
                        "Could not locate Il2Cpp game assembly (GameAssembly.dll, UserAssembly.dll or libil2cpp.so). The game might be obfuscated or use a yet unsupported build of Unity.");
             return;
         }
@@ -91,7 +91,7 @@ public class IL2CPPChainLoader : BaseChainLoader<BasePlugin>
             {
                 if (ConfigUnityLogging.Value)
                 {
-                    EnoModLoader.Logging.Logger.Sources.Add(new IL2CPPUnityLogSource());
+                    Logger.Sources.Add(new IL2CPPUnityLogSource());
 
                     Application.CallLogCallback("Test call after applying unity logging hook", "", LogType.Assert,
                                                 true);
@@ -99,14 +99,14 @@ public class IL2CPPChainLoader : BaseChainLoader<BasePlugin>
 
                 unhook = true;
 
-                Il2CppInteropManager.PreloadInteropAssemblies();
+                EnoUnityLoader.IL2CPP.Il2CppInteropManager.PreloadInteropAssemblies();
 
                 Instance?.Execute();
             }
             catch (Exception ex)
             {
-                EnoModLoader.Logging.Logger.Log(LogLevel.Fatal, "Unable to execute IL2CPP chainloader");
-                EnoModLoader.Logging.Logger.Log(LogLevel.Error, ex);
+                Logger.Log(LogLevel.Fatal, "Unable to execute IL2CPP chainloader");
+                Logger.Log(LogLevel.Error, ex);
             }
 
         var result = originalInvoke!(method, obj, parameters, exc);
@@ -130,15 +130,15 @@ public class IL2CPPChainLoader : BaseChainLoader<BasePlugin>
 
         ChainloaderLogHelper.RewritePreloaderLogs();
 
-        EnoModLoader.Logging.Logger.Sources.Add(new IL2CPPLogSource());
+        Logger.Sources.Add(new IL2CPPLogSource());
     }
 
     /// <inheritdoc />
     protected override bool TryGetPatchedAssembly(string fileName, [NotNullWhen(true)] out Assembly? assembly)
     {
-        if (Preloader.PatchedAssemblies != null && Preloader.PatchedAssemblies.TryGetValue(fileName, out assembly))
+        if (EnoUnityLoader.IL2CPP.Preloader.PatchedAssemblies != null && EnoUnityLoader.IL2CPP.Preloader.PatchedAssemblies.TryGetValue(fileName, out assembly))
         {
-            EnoModLoader.Logging.Logger.Log(LogLevel.Debug, $"Using preloader-patched assembly: {fileName}");
+            Logger.Log(LogLevel.Debug, $"Using preloader-patched assembly: {fileName}");
             return true;
         }
 

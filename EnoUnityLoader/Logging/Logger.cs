@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using EnoModLoader.Logging.Interpolation;
+using EnoUnityLoader.Logging.Interpolation;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 /// Handles pub-sub event marshalling across all log listeners and sources.

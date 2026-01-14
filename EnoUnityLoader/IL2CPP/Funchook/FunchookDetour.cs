@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace EnoModLoader.IL2CPP.Funchook;
+namespace EnoUnityLoader.IL2CPP.Funchook;
 
 internal class FunchookDetour : BaseNativeDetour<FunchookDetour>
 {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using EnoModLoader.Console;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Console;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.Preloader;
+namespace EnoUnityLoader.Preloader;
 
 /// <summary>
 ///     Helper class for logging chainloader information.

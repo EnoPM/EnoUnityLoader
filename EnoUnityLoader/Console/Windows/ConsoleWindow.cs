@@ -7,7 +7,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader.Console.Windows;
+namespace EnoUnityLoader.Console.Windows;
 
 internal class ConsoleWindow
 {

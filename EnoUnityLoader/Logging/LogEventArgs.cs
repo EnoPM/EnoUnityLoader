@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 /// Log event arguments. Contains info about the log message.

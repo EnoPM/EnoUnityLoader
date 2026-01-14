@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Specify the list of acceptable values for a setting.

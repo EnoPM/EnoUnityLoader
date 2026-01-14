@@ -5,7 +5,7 @@ using ArgumentNullException = System.ArgumentNullException;
 using IEnumerator = Il2CppSystem.Collections.IEnumerator;
 using IntPtr = System.IntPtr;
 
-namespace EnoModLoader.IL2CPP.Utils.Collections;
+namespace EnoUnityLoader.IL2CPP.Utils.Collections;
 
 public class Il2CppManagedEnumerable : Object
 {

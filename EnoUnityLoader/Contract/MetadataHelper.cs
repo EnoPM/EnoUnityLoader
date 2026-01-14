@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using EnoModLoader.Attributes;
+using EnoUnityLoader.Attributes;
 using Mono.Cecil;
 
-namespace EnoModLoader.Contract;
+namespace EnoUnityLoader.Contract;
 
 /// <summary>
 /// Helper class to use for retrieving metadata about a plugin, defined as attributes.

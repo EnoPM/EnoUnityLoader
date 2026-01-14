@@ -1,4 +1,4 @@
-namespace EnoModLoader.IL2CPP.UnityEngine;
+namespace EnoUnityLoader.IL2CPP.UnityEngine;
 
 public enum KeyCode
 {

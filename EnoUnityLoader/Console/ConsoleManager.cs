@@ -2,11 +2,11 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
-using EnoModLoader.Configuration;
-using EnoModLoader.Console.Unix;
-using EnoModLoader.Console.Windows;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Console.Unix;
+using EnoUnityLoader.Console.Windows;
 
-namespace EnoModLoader.Console;
+namespace EnoUnityLoader.Console;
 
 public static class ConsoleManager
 {

@@ -14,11 +14,11 @@
       Modifiez ce chemin selon votre installation.
 
       Exemples:
-        Windows Steam : C:\Program Files (x86)\Steam\steamapps\common\Among Us\ModLoader
-        Windows Epic  : C:\Program Files\Epic Games\AmongUs\ModLoader
-        Linux Steam   : ~/.steam/steam/steamapps/common/Among Us/ModLoader
+        Windows Steam : C:\Program Files (x86)\Steam\steamapps\common\Among Us\EnoUnityLoader
+        Windows Epic  : C:\Program Files\Epic Games\AmongUs\EnoUnityLoader
+        Linux Steam   : ~/.steam/steam/steamapps/common/Among Us/EnoUnityLoader
     -->
-    <ModLoaderOutputPath>C:\Program Files (x86)\Steam\steamapps\common\Among Us\ModLoader</ModLoaderOutputPath>
+    <ModLoaderOutputPath>C:\Program Files (x86)\Steam\steamapps\common\Among Us\EnoUnityLoader</ModLoaderOutputPath>
   </PropertyGroup>
 
 </Project>

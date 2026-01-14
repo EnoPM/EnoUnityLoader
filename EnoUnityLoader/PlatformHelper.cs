@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace EnoModLoader;
+namespace EnoUnityLoader;
 
 /// <summary>
 /// Platform detection helper compatible with MonoMod's old API.

@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using EnoModLoader.Configuration;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Logging;
 using Mono.Cecil;
 
-namespace EnoModLoader.Bootstrap;
+namespace EnoUnityLoader.Bootstrap;
 
 /// <summary>
 ///     A cached assembly.

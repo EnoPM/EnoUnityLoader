@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
-using EnoModLoader.Logging.Interpolation;
+using EnoUnityLoader.Logging.Interpolation;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 /// A generic, multi-purpose log source. Exposes simple API to manually emit logs.

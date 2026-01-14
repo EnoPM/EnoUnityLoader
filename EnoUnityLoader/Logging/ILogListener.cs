@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 /// A generic log listener that receives log events and can route them to some output (e.g. file, console, socket).

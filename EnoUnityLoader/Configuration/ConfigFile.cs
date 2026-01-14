@@ -5,11 +5,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using EnoModLoader.Attributes;
-using EnoModLoader.Logging;
-using EnoModLoader.Contract;
+using EnoUnityLoader.Attributes;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// A helper class to handle persistent data. All public methods are thread-safe.

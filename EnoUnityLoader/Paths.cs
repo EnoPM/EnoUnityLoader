@@ -3,13 +3,15 @@ using System.Linq;
 using System.Reflection;
 using SemanticVersioning;
 
-namespace EnoModLoader;
+namespace EnoUnityLoader;
 
 /// <summary>
 /// Paths used by ModLoader
 /// </summary>
 public static class Paths
 {
+    private const string LoaderDirectoryName = "EnoUnityLoader";
+    
     /// <summary>
     /// ModLoader version.
     /// </summary>
@@ -130,9 +132,9 @@ public static class Paths
             throw new DirectoryNotFoundException("Failed to extract valid GameDataPath from executablePath: " + executablePath);
 
         ManagedPath = managedPath ?? Path.Combine(GameDataPath, "Managed");
-        ModLoaderRootPath = bepinRootPath ?? Path.Combine(GameRootPath, "ModLoader");
+        ModLoaderRootPath = bepinRootPath ?? Path.Combine(GameRootPath, LoaderDirectoryName);
         ConfigPath = Path.Combine(ModLoaderRootPath, "config");
-        ModLoaderConfigPath = Path.Combine(ConfigPath, "ModLoader.cfg");
+        ModLoaderConfigPath = Path.Combine(ConfigPath, $"{LoaderDirectoryName}.cfg");
         PluginPath = Path.Combine(ModLoaderRootPath, "mods");
         PatcherPluginPath = Path.Combine(ModLoaderRootPath, "patchers");
         ModLoaderAssemblyDirectory = Path.Combine(ModLoaderRootPath, "core");

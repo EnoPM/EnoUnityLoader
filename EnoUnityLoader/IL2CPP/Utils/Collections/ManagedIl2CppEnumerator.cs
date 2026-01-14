@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using HarmonyLib;
 
-namespace EnoModLoader.IL2CPP.Utils.Collections;
+namespace EnoUnityLoader.IL2CPP.Utils.Collections;
 
 public class ManagedIl2CppEnumerator : IEnumerator
 {

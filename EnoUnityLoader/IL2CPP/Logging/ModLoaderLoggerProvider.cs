@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Logging;
 using Microsoft.Extensions.Logging;
-using ModLoaderLogLevel = EnoModLoader.Logging.LogLevel;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace EnoModLoader.IL2CPP.Logging;
+namespace EnoUnityLoader.IL2CPP.Logging;
 
 internal class ModLoaderLoggerProvider : ILoggerProvider
 {
@@ -51,7 +50,7 @@ internal class ModLoaderLoggerProvider : ILoggerProvider
 
 
         public bool IsEnabled(LogLevel logLevel) =>
-            (MSLogLevelToModLoaderLogLevel(logLevel) & Logger.ListenedLogLevels) != EnoModLoader.Logging.LogLevel.None;
+            (MSLogLevelToModLoaderLogLevel(logLevel) & Logger.ListenedLogLevels) != EnoUnityLoader.Logging.LogLevel.None;
 
         public IDisposable BeginScope<TState>(TState state) where TState : notnull => new EmptyScope();
 
@@ -61,15 +60,15 @@ internal class ModLoaderLoggerProvider : ILoggerProvider
 
         public event EventHandler<LogEventArgs>? LogEvent;
 
-        private static EnoModLoader.Logging.LogLevel MSLogLevelToModLoaderLogLevel(LogLevel logLevel) => logLevel switch
+        private static EnoUnityLoader.Logging.LogLevel MSLogLevelToModLoaderLogLevel(LogLevel logLevel) => logLevel switch
         {
-            LogLevel.Trace       => EnoModLoader.Logging.LogLevel.Debug,
-            LogLevel.Debug       => EnoModLoader.Logging.LogLevel.Debug,
-            LogLevel.Information => EnoModLoader.Logging.LogLevel.Info,
-            LogLevel.Warning     => EnoModLoader.Logging.LogLevel.Warning,
-            LogLevel.Error       => EnoModLoader.Logging.LogLevel.Error,
-            LogLevel.Critical    => EnoModLoader.Logging.LogLevel.Fatal,
-            LogLevel.None        => EnoModLoader.Logging.LogLevel.None,
+            LogLevel.Trace       => EnoUnityLoader.Logging.LogLevel.Debug,
+            LogLevel.Debug       => EnoUnityLoader.Logging.LogLevel.Debug,
+            LogLevel.Information => EnoUnityLoader.Logging.LogLevel.Info,
+            LogLevel.Warning     => EnoUnityLoader.Logging.LogLevel.Warning,
+            LogLevel.Error       => EnoUnityLoader.Logging.LogLevel.Error,
+            LogLevel.Critical    => EnoUnityLoader.Logging.LogLevel.Fatal,
+            LogLevel.None        => EnoUnityLoader.Logging.LogLevel.None,
             _                    => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
         };
     }

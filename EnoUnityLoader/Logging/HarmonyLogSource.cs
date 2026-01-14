@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using EnoModLoader.Configuration;
+using EnoUnityLoader.Configuration;
 using HarmonyLogger = HarmonyLib.Tools.Logger;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 ///     A log source that listens to HarmonyX log messages.

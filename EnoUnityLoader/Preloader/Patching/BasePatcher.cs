@@ -1,8 +1,8 @@
-using EnoModLoader.Attributes;
-using EnoModLoader.Configuration;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Attributes;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Logging;
 
-namespace EnoModLoader.Preloader.Patching;
+namespace EnoUnityLoader.Preloader.Patching;
 
 /// <summary>
 ///     A patcher that can contain multiple methods for patching assemblies.

@@ -4,7 +4,7 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppInterop.Runtime.InteropTypes;
 using UnityEngine;
 
-namespace EnoModLoader.IL2CPP.Utils;
+namespace EnoUnityLoader.IL2CPP.Utils;
 
 internal static class Il2CppUtils
 {

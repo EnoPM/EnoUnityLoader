@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnoModLoader.Bootstrap;
-using EnoModLoader.Contract;
+using EnoUnityLoader.Bootstrap;
+using EnoUnityLoader.Contract;
 using Mono.Cecil;
 
-namespace EnoModLoader.Attributes;
+namespace EnoUnityLoader.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class ModDependencyAttribute : Attribute, ICacheable

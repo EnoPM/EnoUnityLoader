@@ -5,7 +5,7 @@ using System.Reflection;
 using HarmonyLib;
 using Microsoft.Win32.SafeHandles;
 
-namespace EnoModLoader.Console.Windows;
+namespace EnoUnityLoader.Console.Windows;
 
 internal class WindowsConsoleDriver : IConsoleDriver
 {
@@ -93,7 +93,7 @@ internal class WindowsConsoleDriver : IConsoleDriver
         // Encoding.GetEncoding throws NotImplementedException on most codepages
         // NOTE: We don't set Console.OutputEncoding because it resets any existing Console.Out writers
         if (!useManagedEncoder)
-            ConsoleEncoding.ConsoleEncoding.ConsoleCodePage = codepage;
+            EnoUnityLoader.Console.Windows.ConsoleEncoding.ConsoleEncoding.ConsoleCodePage = codepage;
 
         // If stdout exists, write to it, otherwise make it the same as console out
         // Not sure if this is needed? Does the original Console.Out still work?
@@ -114,7 +114,7 @@ internal class WindowsConsoleDriver : IConsoleDriver
         var consoleOutStream = OpenFileStream(ConsoleWindow.ConsoleOutHandle);
         // Can't use Console.OutputEncoding because it can be null (i.e. not preference by user)
         ConsoleOut = new StreamWriter(consoleOutStream,
-                                      useManagedEncoder ? Utility.UTF8NoBom : ConsoleEncoding.ConsoleEncoding.OutputEncoding)
+                                      useManagedEncoder ? Utility.UTF8NoBom : EnoUnityLoader.Console.Windows.ConsoleEncoding.ConsoleEncoding.OutputEncoding)
         {
             AutoFlush = true
         };

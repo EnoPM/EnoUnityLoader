@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 /// Log source that can output log messages.

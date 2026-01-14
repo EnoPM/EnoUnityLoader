@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace EnoModLoader.IL2CPP.Utils;
+namespace EnoUnityLoader.IL2CPP.Utils;
 
 internal static class NotifySend
 {

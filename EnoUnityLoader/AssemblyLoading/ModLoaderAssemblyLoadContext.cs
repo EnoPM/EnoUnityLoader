@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
 
-namespace EnoModLoader.AssemblyLoading;
+namespace EnoUnityLoader.AssemblyLoading;
 
 /// <summary>
 /// Custom AssemblyLoadContext for ModLoader plugin loading.

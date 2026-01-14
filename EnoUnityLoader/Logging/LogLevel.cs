@@ -1,6 +1,6 @@
 using System;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 /// The level, or severity of a log entry.

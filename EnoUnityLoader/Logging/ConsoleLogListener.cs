@@ -1,8 +1,8 @@
 using System;
-using EnoModLoader.Configuration;
-using EnoModLoader.Console;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Console;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 ///     Logs entries using a console spawned by ModLoader.

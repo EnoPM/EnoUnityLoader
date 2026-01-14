@@ -3,7 +3,7 @@
 // Copyright (c) Usagirei 2015 - 2015
 // --------------------------------------------------
 
-namespace EnoModLoader.Console.Windows.ConsoleEncoding;
+namespace EnoUnityLoader.Console.Windows.ConsoleEncoding;
 // --------------------------------------------------
 // Code ported from
 // https://gist.github.com/asm256/9bfb88336a1433e2328a

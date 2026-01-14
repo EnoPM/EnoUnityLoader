@@ -1,7 +1,7 @@
 using System;
 using Il2CppInterop.Runtime.Injection;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 internal class Il2CppInteropDetourProvider : IDetourProvider
 {

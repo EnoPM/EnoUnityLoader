@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace EnoModLoader.Logging;
+namespace EnoUnityLoader.Logging;
 
 /// <summary>
 ///     A source that routes all logs from the inbuilt .NET <see cref="Trace" /> API to the ModLoader logging system.

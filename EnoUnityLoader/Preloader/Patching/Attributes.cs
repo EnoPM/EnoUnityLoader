@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using EnoModLoader.Contract;
+using EnoUnityLoader.Contract;
 using Mono.Cecil;
 using Version = SemanticVersioning.Version;
 
-namespace EnoModLoader.Preloader.Patching;
+namespace EnoUnityLoader.Preloader.Patching;
 
 /// <summary>
 ///     This attribute denotes that a class is a patcher plugin, and specifies the required metadata.

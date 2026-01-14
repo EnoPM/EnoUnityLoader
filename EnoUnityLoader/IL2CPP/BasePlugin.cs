@@ -1,9 +1,9 @@
-using EnoModLoader.Configuration;
-using EnoModLoader.Contract;
-using EnoModLoader.Logging;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.Contract;
+using EnoUnityLoader.Logging;
 using Il2CppInterop.Runtime.InteropTypes;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 /// <summary>
 ///     Base class for IL2CPP plugins.

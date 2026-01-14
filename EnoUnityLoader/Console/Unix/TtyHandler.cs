@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace EnoModLoader.Console.Unix;
+namespace EnoUnityLoader.Console.Unix;
 
 internal class TtyInfo
 {

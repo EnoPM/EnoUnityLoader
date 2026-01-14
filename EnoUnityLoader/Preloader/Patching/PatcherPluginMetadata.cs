@@ -1,7 +1,7 @@
 using System.IO;
-using EnoModLoader.Bootstrap;
+using EnoUnityLoader.Bootstrap;
 
-namespace EnoModLoader.Preloader.Patching;
+namespace EnoUnityLoader.Preloader.Patching;
 
 /// <summary>
 ///     A single cached assembly patcher.

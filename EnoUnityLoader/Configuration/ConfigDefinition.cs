@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
 
-namespace EnoModLoader.Configuration;
+namespace EnoUnityLoader.Configuration;
 
 /// <summary>
 /// Section and key of a setting. Used as a unique key for identification within a
-/// <see cref="ConfigFile" />.
+/// <see cref="Section" />.
 /// The same definition can be used in multiple config files, it will point to different settings then.
 /// </summary>
-/// <param name="Section">Group of the setting, case sensitive.</param>
+/// <param name="Key">Group of the setting, case sensitive.</param>
 /// <param name="Key">Name of the setting, case sensitive.</param>
 public sealed record ConfigDefinition(string Section, string Key)
 {

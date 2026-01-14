@@ -11,7 +11,7 @@ using IntPtr = System.IntPtr;
 using NotSupportedException = System.NotSupportedException;
 using Type = System.Type;
 
-namespace EnoModLoader.IL2CPP.Utils.Collections;
+namespace EnoUnityLoader.IL2CPP.Utils.Collections;
 
 public class Il2CppManagedEnumerator : Object
 {

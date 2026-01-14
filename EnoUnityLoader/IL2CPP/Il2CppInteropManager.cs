@@ -16,12 +16,12 @@ using Cpp2IL.Core.Api;
 using Cpp2IL.Core.InstructionSets;
 using Cpp2IL.Core.OutputFormats;
 using Cpp2IL.Core.ProcessingLayers;
-using EnoModLoader.AssemblyLoading;
-using EnoModLoader.Bootstrap;
-using EnoModLoader.Configuration;
-using EnoModLoader.IL2CPP.Logging;
-using EnoModLoader.Logging;
-using EnoModLoader.Unity;
+using EnoUnityLoader.AssemblyLoading;
+using EnoUnityLoader.Bootstrap;
+using EnoUnityLoader.Configuration;
+using EnoUnityLoader.IL2CPP.Logging;
+using EnoUnityLoader.Logging;
+using EnoUnityLoader.Unity;
 using HarmonyLib;
 using Il2CppInterop.Common;
 using Il2CppInterop.Generator;
@@ -33,7 +33,7 @@ using Microsoft.Extensions.Logging;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using MSLoggerFactory = Microsoft.Extensions.Logging.LoggerFactory;
 
-namespace EnoModLoader.IL2CPP;
+namespace EnoUnityLoader.IL2CPP;
 
 internal static partial class Il2CppInteropManager
 {
@@ -111,7 +111,7 @@ internal static partial class Il2CppInteropManager
          .AppendLine("{GameDataPath} - Path to the game's Data folder.")
          .ToString());
 
-    private static readonly ManualLogSource Logger = EnoModLoader.Logging.Logger.CreateLogSource("InteropManager");
+    private static readonly ManualLogSource Logger = EnoUnityLoader.Logging.Logger.CreateLogSource("InteropManager");
 
     private static string? il2cppInteropBasePath;
 
@@ -340,7 +340,7 @@ internal static partial class Il2CppInteropManager
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var cpp2IlLogger = EnoModLoader.Logging.Logger.CreateLogSource("Cpp2IL");
+        var cpp2IlLogger = EnoUnityLoader.Logging.Logger.CreateLogSource("Cpp2IL");
 
         Cpp2IL.Core.Logging.Logger.VerboseLog += (message, s) =>
             cpp2IlLogger.LogDebug($"[{s}] {message.Trim()}");
