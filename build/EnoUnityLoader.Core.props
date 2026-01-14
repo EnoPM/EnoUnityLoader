@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Common properties for all projects that build assemblies destined for the ModLoader/core folder.
+
+  Usage: Add this to your .csproj file:
+  <Import Project="$(SolutionDir)build\EnoModLoader.Core.props" />
+
+  Or for projects outside src/:
+  <Import Project="..\..\build\EnoModLoader.Core.props" />
+-->
+<Project>
+
+  <PropertyGroup>
+    <!-- Solution directory fallback when building project directly -->
+    <SolutionDir Condition="'$(SolutionDir)' == '' or '$(SolutionDir)' == '*Undefined*'">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'EnoUnityLoader.sln'))\</SolutionDir>
+
+    <!-- .NET 10 target -->
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!-- Build settings -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+
+    <!-- Suppress XML documentation warnings for undocumented members -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- Don't warn about EOL target frameworks during preview -->
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
+
+  <!-- Debug configuration -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Release configuration -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <!--
+    Output directory configuration.
+    Override ModLoaderOutputPath in your csproj or via command line:
+    dotnet build -p:ModLoaderOutputPath="C:\Games\MyGame\ModLoader"
+  -->
+  <PropertyGroup>
+    <ModLoaderOutputPath Condition="'$(ModLoaderOutputPath)' == ''">$(SolutionDir)output\ModLoader</ModLoaderOutputPath>
+    <CoreOutputPath>$(ModLoaderOutputPath)\core</CoreOutputPath>
+  </PropertyGroup>
+
+  <!--
+    Copy output to core folder after build.
+    Set CopyToModLoaderCore=false in your csproj to disable.
+  -->
+  <PropertyGroup>
+    <CopyToModLoaderCore Condition="'$(CopyToModLoaderCore)' == ''">true</CopyToModLoaderCore>
+  </PropertyGroup>
+
+</Project>

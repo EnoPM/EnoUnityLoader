@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuration locale du build.
+  Ce fichier peut être modifié localement sans affecter le dépôt.
+
+  IMPORTANT: Ajoutez ce fichier à .gitignore si vous modifiez ModLoaderOutputPath
+  pour éviter de commiter des chemins spécifiques à votre machine.
+-->
+<Project>
+
+  <PropertyGroup>
+    <!--
+      Chemin vers le dossier ModLoader du jeu.
+      Modifiez ce chemin selon votre installation.
+
+      Exemples:
+        Windows Steam : C:\Program Files (x86)\Steam\steamapps\common\Among Us\ModLoader
+        Windows Epic  : C:\Program Files\Epic Games\AmongUs\ModLoader
+        Linux Steam   : ~/.steam/steam/steamapps/common/Among Us/ModLoader
+    -->
+    <ModLoaderOutputPath>C:\Program Files (x86)\Steam\steamapps\common\Among Us\ModLoader</ModLoaderOutputPath>
+  </PropertyGroup>
+
+</Project>

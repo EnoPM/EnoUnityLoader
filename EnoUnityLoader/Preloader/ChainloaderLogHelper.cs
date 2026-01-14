@@ -1,0 +1,156 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using EnoModLoader.Console;
+using EnoModLoader.Logging;
+
+namespace EnoModLoader.Preloader;
+
+/// <summary>
+///     Helper class for logging chainloader information.
+/// </summary>
+public static class ChainloaderLogHelper
+{
+    private static Dictionary<string, string> MacOSVersions { get; } = new()
+    {
+        // https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
+        ["16.0.0"] = "10.12",
+        ["16.5.0"] = "10.12.4",
+        ["16.6.0"] = "10.12.6",
+        ["17.5.0"] = "10.13.4",
+        ["17.6.0"] = "10.13.5",
+        ["17.7.0"] = "10.13.6",
+        ["18.2.0"] = "10.14.1",
+        ["19.2.0"] = "10.15.2",
+        ["19.3.0"] = "10.15.3",
+        ["19.5.0"] = "10.15.5.1",
+        ["20.1.0"] = "11.0",
+        ["20.2.0"] = "11.1",
+        ["20.3.0"] = "11.2",
+        ["20.4.0"] = "11.3",
+        ["20.5.0"] = "11.4",
+        ["21.0.1"] = "12.0",
+        ["21.1.0"] = "12.0.1",
+        ["21.2.0"] = "12.1",
+    };
+
+    /// <summary>
+    ///     Prints ModLoader version and platform information to the log.
+    /// </summary>
+    /// <param name="log">The log source to write to.</param>
+    public static void PrintLogInfo(ManualLogSource log)
+    {
+        var bepinVersion = Paths.ModLoaderVersion;
+        var versionMini = new SemanticVersioning.Version(bepinVersion.Major, bepinVersion.Minor, bepinVersion.Patch,
+                                                         bepinVersion.PreRelease);
+        var consoleTitle = $"ModLoader {versionMini} - {Paths.ProcessName}";
+        log.Log(LogLevel.Message, $"{consoleTitle} ({File.GetLastWriteTime(Paths.ExecutablePath)})");
+
+        if (ConsoleManager.ConsoleActive)
+            ConsoleManager.SetConsoleTitle(consoleTitle);
+
+        if (!string.IsNullOrEmpty(bepinVersion.Build))
+            log.Log(LogLevel.Message, $"Built from commit {bepinVersion.Build}");
+
+        Logger.Log(LogLevel.Info, $"System platform: {GetPlatformString()}");
+        Logger.Log(LogLevel.Info,
+                   $"Process bitness: {(PlatformUtils.ProcessIs64Bit ? "64-bit (x64)" : "32-bit (x86)")}");
+    }
+
+    private static string GetPlatformString()
+    {
+        var builder = new StringBuilder();
+
+        var osVersion = Environment.OSVersion.Version;
+
+        if (PlatformHelper.Is(Platform.Windows))
+        {
+            osVersion = PlatformUtils.WindowsVersion ?? osVersion;
+
+            builder.Append("Windows ");
+
+            // https://stackoverflow.com/a/2819962
+            if (osVersion.Major >= 10 && osVersion.Build >= 22000)
+                builder.Append("11");
+            else if (osVersion.Major >= 10)
+                builder.Append("10");
+            else if (osVersion.Major == 6 && osVersion.Minor == 3)
+                builder.Append("8.1");
+            else if (osVersion.Major == 6 && osVersion.Minor == 2)
+                builder.Append("8");
+            else if (osVersion.Major == 6 && osVersion.Minor == 1)
+                builder.Append("7");
+            else if (osVersion.Major == 6 && osVersion.Minor == 0)
+                builder.Append("Vista");
+            else if (osVersion.Major <= 5)
+                builder.Append("XP");
+
+            if (PlatformHelper.Is(Platform.Wine))
+                builder.AppendFormat(" (Wine {0})", PlatformUtils.WineVersion);
+        }
+        else if (PlatformHelper.Is(Platform.MacOS))
+        {
+            builder.Append("macOS ");
+
+            var osxVersion = osVersion.ToString(3);
+
+            if (MacOSVersions.TryGetValue(osxVersion, out var macOsVersion))
+            {
+                builder.Append(macOsVersion);
+            }
+            else
+            {
+                builder.AppendFormat("Unknown (kernel {0})", osVersion);
+            }
+        }
+        else if (PlatformHelper.Is(Platform.Linux))
+        {
+            builder.Append("Linux");
+
+            if (PlatformUtils.LinuxKernelVersion != null)
+            {
+                builder.AppendFormat(" (kernel {0})", PlatformUtils.LinuxKernelVersion);
+            }
+        }
+
+        builder.Append(PlatformHelper.Is(Platform.Bits64) ? " 64-bit" : " 32-bit");
+
+        if (PlatformHelper.Is(Platform.Android))
+        {
+            builder.Append(" Android");
+        }
+
+        if (PlatformHelper.Is(Platform.ARM))
+        {
+            builder.Append(" ARM");
+
+            if (PlatformHelper.Is(Platform.Bits64))
+                builder.Append("64");
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>
+    ///     Rewrites preloader logs to the main logger.
+    /// </summary>
+    public static void RewritePreloaderLogs()
+    {
+        if (PreloaderConsoleListener.LogEvents.Count == 0)
+            return;
+
+        // Temporarily disable the console log listener (if there is one from preloader) as we replay the preloader logs
+        var logListener = Logger.Listeners.FirstOrDefault(logger => logger is ConsoleLogListener);
+
+        if (logListener != null)
+            Logger.Listeners.Remove(logListener);
+
+        foreach (var preloaderLogEvent in PreloaderConsoleListener.LogEvents)
+            Logger.InternalLogEvent(PreloaderLogger.Log, preloaderLogEvent);
+
+        if (logListener != null)
+            Logger.Listeners.Add(logListener);
+    }
+}
