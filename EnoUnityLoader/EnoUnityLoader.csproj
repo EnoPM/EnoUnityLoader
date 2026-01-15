@@ -5,9 +5,23 @@
         <Version>1.0.0</Version>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <FileVersion>1.0.0.0</FileVersion>
-        
+
         <!-- Ensure NuGet dependencies are copied to output folder -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <!-- NuGet Package Configuration -->
+    <PropertyGroup>
+        <PackageId>EnoPM.EnoUnityLoader</PackageId>
+        <Authors>EnoPM</Authors>
+        <Description>Unity IL2CPP mod loader for .NET 10</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/EnoPM/EnoUnityLoader</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/EnoPM/EnoUnityLoader</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <IsPackable>true</IsPackable>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <PropertyGroup>
