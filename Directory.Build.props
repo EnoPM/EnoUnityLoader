@@ -19,6 +19,7 @@
         Linux Steam   : ~/.steam/steam/steamapps/common/Among Us/EnoUnityLoader
     -->
     <ModLoaderOutputPath>C:\Program Files (x86)\Steam\steamapps\common\Among Us\EnoUnityLoader</ModLoaderOutputPath>
+    <InteropOutputPath>$(ModLoaderOutputPath)\interop</InteropOutputPath>
   </PropertyGroup>
 
 </Project>

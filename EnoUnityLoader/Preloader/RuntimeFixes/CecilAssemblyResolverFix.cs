@@ -1,11 +1,14 @@
 using System;
 using System.IO;
+using System.Reflection;
 using Mono.Cecil;
 
 namespace EnoUnityLoader.Preloader.RuntimeFixes;
 
 /// <summary>
 /// Configures Cecil's assembly resolver to find .NET 10 runtime assemblies.
+/// This is needed because MonoMod/Harmony uses Cecil internally and needs to resolve
+/// System.Private.CoreLib and other BCL assemblies when creating dynamic methods.
 /// </summary>
 public static class CecilAssemblyResolverFix
 {
@@ -18,6 +21,7 @@ public static class CecilAssemblyResolverFix
 
     /// <summary>
     /// Initializes the Cecil assembly resolver with .NET 10 runtime paths.
+    /// Must be called early in the startup process, before Harmony/MonoMod is used.
     /// </summary>
     public static void Initialize()
     {
@@ -27,55 +31,66 @@ public static class CecilAssemblyResolverFix
         _initialized = true;
 
         // Get the runtime directory from the CoreLib assembly location
-        // This is the most reliable way to find where .NET 10 runtime assemblies are
         var coreLibPath = typeof(object).Assembly.Location;
         if (!string.IsNullOrEmpty(coreLibPath))
         {
             RuntimeDirectory = Path.GetDirectoryName(coreLibPath);
         }
 
-        // Fallback: try to find it from dotnet shared directory
+        // Fallback: try RuntimeEnvironment
         if (string.IsNullOrEmpty(RuntimeDirectory) || !Directory.Exists(RuntimeDirectory))
         {
-            var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
-            if (string.IsNullOrEmpty(dotnetRoot))
-            {
-                // Try common locations
-                var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                var possiblePaths = new[]
-                {
-                    Path.Combine(userProfile, ".dotnet"),
-                    @"C:\Program Files\dotnet",
-                    @"C:\Program Files (x86)\dotnet"
-                };
+            RuntimeDirectory = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+        }
 
-                foreach (var path in possiblePaths)
-                {
-                    var sharedPath = Path.Combine(path, "shared", "Microsoft.NETCore.App");
-                    if (Directory.Exists(sharedPath))
-                    {
-                        // Find the highest version directory
-                        var versions = Directory.GetDirectories(sharedPath);
-                        foreach (var versionDir in versions)
-                        {
-                            if (Path.GetFileName(versionDir).StartsWith("10."))
-                            {
-                                RuntimeDirectory = versionDir;
-                                break;
-                            }
-                        }
-                        if (!string.IsNullOrEmpty(RuntimeDirectory))
-                            break;
-                    }
-                }
+        if (string.IsNullOrEmpty(RuntimeDirectory) || !Directory.Exists(RuntimeDirectory))
+        {
+            return;
+        }
+
+        // Hook into AppDomain.AssemblyResolve to help Cecil find BCL assemblies
+        // This is needed because MonoMod's Cecil instance doesn't have the runtime directory configured
+        AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+    }
+
+    private static Assembly? OnAssemblyResolve(object? sender, ResolveEventArgs args)
+    {
+        if (string.IsNullOrEmpty(RuntimeDirectory))
+            return null;
+
+        var assemblyName = new AssemblyName(args.Name);
+
+        // Only handle BCL assemblies
+        if (!IsBclAssembly(assemblyName.Name))
+            return null;
+
+        var assemblyPath = Path.Combine(RuntimeDirectory, assemblyName.Name + ".dll");
+        if (File.Exists(assemblyPath))
+        {
+            try
+            {
+                return Assembly.LoadFrom(assemblyPath);
+            }
+            catch
+            {
+                // Ignore load failures
             }
         }
 
-        // Configure environment variable for any tools that respect it
-        if (!string.IsNullOrEmpty(RuntimeDirectory))
-        {
-            Environment.SetEnvironmentVariable("MONOMOD_DETOURER_CECIL_PATH", RuntimeDirectory);
-        }
+        return null;
+    }
+
+    private static bool IsBclAssembly(string? name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return false;
+
+        return name.StartsWith("System.") ||
+               name == "System" ||
+               name == "mscorlib" ||
+               name == "netstandard" ||
+               name.StartsWith("Microsoft.") ||
+               name == "WindowsBase";
     }
 
     /// <summary>

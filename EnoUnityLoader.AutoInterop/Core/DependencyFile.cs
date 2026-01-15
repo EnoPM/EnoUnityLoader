@@ -1,0 +1,34 @@
+using System;
+using EnoUnityLoader.AutoInterop.Cecil.Interfaces;
+using Mono.Cecil;
+
+namespace EnoUnityLoader.AutoInterop.Core;
+
+public sealed class DependencyFile : IDependencyFile
+{
+    public string Path { get; }
+
+    public bool CanBeLoaded { get; private set; }
+    public AssemblyDefinition? LoadedAssembly { get; set; }
+    public bool IsLoaded => LoadedAssembly != null;
+    public bool IsAvailable => CanBeLoaded && IsLoaded;
+
+    internal DependencyFile(string filePath)
+    {
+        Path = filePath;
+        CanBeLoaded = true;
+    }
+
+    public void Load(IAssemblyLoader loader)
+    {
+        if (IsLoaded || !CanBeLoaded) return;
+        try
+        {
+            LoadedAssembly = loader.Load(Path);
+        }
+        catch (BadImageFormatException)
+        {
+            CanBeLoaded = false;
+        }
+    }
+}

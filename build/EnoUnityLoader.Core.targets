@@ -5,6 +5,6 @@
 -->
 <Project>
 
-  <Import Project="$(MSBuildThisFileDirectory)EnoUnityLoader.CopyToCore.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)EnoUnityLoader.CopyToGameFiles.targets" />
 
 </Project>

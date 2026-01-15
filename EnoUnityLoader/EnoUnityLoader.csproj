@@ -5,9 +5,7 @@
         <Version>1.0.0</Version>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <FileVersion>1.0.0.0</FileVersion>
-
-        <!-- Copy all DLLs including dependencies to core folder -->
-        <CopyAllDependenciesToCore>true</CopyAllDependenciesToCore>
+        
         <!-- Ensure NuGet dependencies are copied to output folder -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
@@ -18,13 +16,18 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <CopyAllDependenciesToCore>true</CopyAllDependenciesToCore>
+        <CopyToCore>true</CopyToCore>
+    </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="AssetRipper.Primitives" Version="3.2.0" />
       <PackageReference Include="enopm.harmonyx" Version="2.16.0" />
-      <PackageReference Include="enopm.il2cppinterop.generator" Version="1.5.1" />
-      <PackageReference Include="enopm.il2cppinterop.harmonysupport" Version="1.5.1" />
-      <PackageReference Include="enopm.il2cppinterop.runtime" Version="1.5.1" />
+      <PackageReference Include="enopm.il2cppinterop.generator" Version="1.5.2" />
+      <PackageReference Include="enopm.il2cppinterop.harmonysupport" Version="1.5.2" />
+      <PackageReference Include="enopm.il2cppinterop.runtime" Version="1.5.2" />
       <PackageReference Include="Iced" Version="1.21.0" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
       <PackageReference Include="Mono.Cecil" Version="0.11.6" />

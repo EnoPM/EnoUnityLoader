@@ -12,6 +12,7 @@ using EnoUnityLoader.Configuration;
 using EnoUnityLoader.Console;
 using EnoUnityLoader.Contract;
 using EnoUnityLoader.Logging;
+using EnoUnityLoader.PluginPatching;
 using Mono.Cecil;
 
 namespace EnoUnityLoader.Bootstrap;
@@ -25,7 +26,7 @@ public abstract partial class BaseChainLoader<TPlugin>
     /// <summary>
     ///     Name of the currently executing assembly.
     /// </summary>
-    protected static readonly string CurrentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "ModLoader";
+    protected static readonly string CurrentAssemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "EnoUnityLoader";
 
     /// <summary>
     ///     Version of the currently executing assembly.
@@ -89,7 +90,7 @@ public abstract partial class BaseChainLoader<TPlugin>
         var incompatibilities = ModIncompatibilityAttribute.FromCecilType(type);
 
         var bepinVersion =
-            type.Module.AssemblyReferences.FirstOrDefault(reference => reference.Name == "EnoModLoader")?.Version ??
+            type.Module.AssemblyReferences.FirstOrDefault(reference => reference.Name == CurrentAssemblyName)?.Version ??
             new Version();
 
         return new PluginInfo
@@ -109,7 +110,7 @@ public abstract partial class BaseChainLoader<TPlugin>
     /// </summary>
     protected static bool HasModLoaderPlugins(AssemblyDefinition ass)
     {
-        if (ass.MainModule.AssemblyReferences.All(r => r.Name != CurrentAssemblyName && r.Name != "EnoModLoader"))
+        if (ass.MainModule.AssemblyReferences.All(r => r.Name != CurrentAssemblyName))
             return false;
         if (ass.MainModule.GetTypeReferences().All(r => r.FullName != typeof(ModInfosAttribute).FullName))
             return false;
@@ -135,9 +136,14 @@ public abstract partial class BaseChainLoader<TPlugin>
     /// <summary>
     ///     Title for the console window.
     /// </summary>
-    protected virtual string ConsoleTitle => $"EnoModLoader {Paths.ModLoaderVersion} - {Paths.ProcessName}";
+    protected virtual string ConsoleTitle => $"EnoUnityLoader {Paths.ModLoaderVersion} - {Paths.ProcessName}";
 
     private bool _initialized;
+
+    /// <summary>
+    /// Engine for patching plugin assemblies before they are loaded.
+    /// </summary>
+    private PluginPatcherEngine? _pluginPatcherEngine;
 
     /// <summary>
     ///     List of all <see cref="PluginInfo" /> instances loaded via the chainloader.
@@ -182,6 +188,16 @@ public abstract partial class BaseChainLoader<TPlugin>
 
         if (!Directory.Exists(Paths.PatcherPluginPath))
             Directory.CreateDirectory(Paths.PatcherPluginPath);
+
+        if (!Directory.Exists(Paths.PluginPatcherPath))
+            Directory.CreateDirectory(Paths.PluginPatcherPath);
+
+        // Initialize plugin patcher engine
+        if (PluginPatcherEngine.IsEnabled)
+        {
+            _pluginPatcherEngine = new PluginPatcherEngine();
+            _pluginPatcherEngine.LoadPatchersFromDirectory(Paths.PluginPatcherPath);
+        }
 
         _initialized = true;
 
@@ -443,8 +459,12 @@ public abstract partial class BaseChainLoader<TPlugin>
                     var fileName = Path.GetFileName(plugin.Location);
                     if (!TryGetPatchedAssembly(fileName, out ass))
                     {
-                        // Use AssemblyLoadContext instead of Assembly.LoadFrom for .NET 10 compatibility
-                        ass = ModLoaderAssemblyLoadContext.Default.LoadFromPath(plugin.Location);
+                        // Check for plugin patcher cached or patched assembly
+                        if (!TryGetPluginPatchedAssembly(plugin, out ass))
+                        {
+                            // Use AssemblyLoadContext instead of Assembly.LoadFrom for .NET 10 compatibility
+                            ass = ModLoaderAssemblyLoadContext.Default.LoadFromPath(plugin.Location);
+                        }
                     }
                     loadedAssemblies[plugin.Location] = ass;
                 }
@@ -512,6 +532,29 @@ public abstract partial class BaseChainLoader<TPlugin>
     {
         assembly = null;
         return false;
+    }
+
+    /// <summary>
+    ///     Tries to get a plugin-patched assembly from the plugin patcher engine.
+    ///     This checks for cached patched assemblies or applies patching if needed.
+    /// </summary>
+    /// <param name="pluginInfo">The plugin info.</param>
+    /// <param name="assembly">The patched assembly if found or patched.</param>
+    /// <returns>True if a patched assembly was obtained.</returns>
+    protected virtual bool TryGetPluginPatchedAssembly(PluginInfo pluginInfo, [NotNullWhen(true)] out Assembly? assembly)
+    {
+        assembly = null;
+
+        if (_pluginPatcherEngine == null || _pluginPatcherEngine.Context.Patchers.Count == 0)
+            return false;
+
+        // First check if there's a cached patched assembly
+        if (_pluginPatcherEngine.TryGetCachedAssembly(pluginInfo, out assembly) && assembly != null)
+            return true;
+
+        // Try to patch the plugin (this will check if any patchers target it)
+        assembly = _pluginPatcherEngine.PatchPlugin(pluginInfo);
+        return assembly != null;
     }
 
     /// <summary>

@@ -1,0 +1,20 @@
+using System.Collections.Generic;
+using System.Reflection;
+using Mono.Cecil;
+
+namespace EnoUnityLoader.AutoInterop.Cecil.Interfaces;
+
+public interface IAssemblyDependencyManager
+{
+    public IList<IDependencyFile> Files { get; }
+
+    public void AddFile(params string[] files);
+    public void AddDirectory(params string[] directory);
+
+    public void LoadAllFiles();
+
+    public AssemblyDefinition? FindLoadedAssembly(AssemblyName assemblyName);
+    public TypeDefinition? FindLoadedType(string typeFullName, in List<string> excludedFiles);
+
+    public List<AssemblyDefinition> GetDependentAssemblies(AssemblyNameDefinition from);
+}

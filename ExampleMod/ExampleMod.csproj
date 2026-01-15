@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <CopyToMods>true</CopyToMods>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\EnoUnityLoader\EnoUnityLoader.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="$(InteropOutputPath)\*.dll"/>
+    </ItemGroup>
+
+</Project>

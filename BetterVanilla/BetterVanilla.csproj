@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <CopyToMods>true</CopyToMods>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\EnoUnityLoader\EnoUnityLoader.csproj"/>
+    </ItemGroup>
+
+    <!-- Reference game's interop assemblies (generated after first run) -->
+    <ItemGroup>
+        <Reference Include="$(InteropOutputPath)\*.dll"/>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Assets\menu.ui"/>
+        <EmbeddedResource Include="Assets\better.game"/>
+    </ItemGroup>
+
+</Project>

@@ -20,10 +20,7 @@ public static class ConsoleSetOutFix
     {
         loggedTextWriter = new LoggedTextWriter { Parent = System.Console.Out };
         System.Console.SetOut(loggedTextWriter);
-
-        // TODO: Harmony patching disabled for .NET 10 compatibility
-        // MonoMod.RuntimeDetour 25.2+ required but not available on public NuGet
-        // Harmony.CreateAndPatchAll(typeof(ConsoleSetOutFix));
+        Harmony.CreateAndPatchAll(typeof(ConsoleSetOutFix));
     }
 
     [HarmonyPatch(typeof(System.Console), nameof(System.Console.SetOut))]

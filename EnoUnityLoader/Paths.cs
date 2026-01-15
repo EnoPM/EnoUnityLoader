@@ -76,6 +76,12 @@ public static class Paths
     public static string PatcherPluginPath { get; private set; } = string.Empty;
 
     /// <summary>
+    /// The path to the plugin patcher folder which resides in the patchers folder.
+    /// Plugin patchers can modify plugin assemblies before they are loaded.
+    /// </summary>
+    public static string PluginPatcherPath { get; private set; } = string.Empty;
+
+    /// <summary>
     /// The path to the plugin folder which resides in the ModLoader folder.
     /// <para>
     /// This is ONLY guaranteed to be set correctly when Chainloader has been initialized.
@@ -137,6 +143,7 @@ public static class Paths
         ModLoaderConfigPath = Path.Combine(ConfigPath, $"{LoaderDirectoryName}.cfg");
         PluginPath = Path.Combine(ModLoaderRootPath, "mods");
         PatcherPluginPath = Path.Combine(ModLoaderRootPath, "patchers");
+        PluginPatcherPath = Path.Combine(PatcherPluginPath, "plugins");
         ModLoaderAssemblyDirectory = Path.Combine(ModLoaderRootPath, "core");
         ModLoaderAssemblyPath = Path.Combine(ModLoaderAssemblyDirectory,
                                            $"{Assembly.GetExecutingAssembly().GetName().Name}.dll");

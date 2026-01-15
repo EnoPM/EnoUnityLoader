@@ -31,7 +31,10 @@ public static class PlatformUtils
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
-    private static bool Is(this Platform current, Platform expected) => (current & expected) == expected;
+    extension(Platform current)
+    {
+        private bool Is(Platform expected) => (current &  expected) == expected;
+    }
 
     /// <summary>
     ///     Recreation of MonoMod's PlatformHelper.DeterminePlatform method, but with libc calls instead of creating processes.
