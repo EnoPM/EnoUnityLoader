@@ -22,7 +22,9 @@ public sealed class MurderHistory
         var friendCode = murder.FriendCode;
         if (friendCode == null) return true;
         var allowedTime = DateTime.UtcNow.AddSeconds(-2);
-        return CurrentGame.All(x => x.Murder == friendCode && x.CreatedAt <= allowedTime);
+        return CurrentGame
+            .Where(x => x.Murder == friendCode)
+            .All(x => x.CreatedAt <= allowedTime);
     }
 
     static MurderHistory()
