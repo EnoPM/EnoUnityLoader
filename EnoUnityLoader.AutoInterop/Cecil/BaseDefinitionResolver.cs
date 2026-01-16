@@ -30,10 +30,10 @@ public abstract class BaseDefinitionResolver
         }
     }
 
-    private MethodDefinition LoadMethodByFullName(string methodFullName, ResolverContext context = ResolverContext.All)
+    private MethodDefinition LoadMethodByFullName(string methodFullName, ResolverContext context = ResolverContext.All, string? assemblyName = null)
     {
         var typeFullName = MethodsUtility.ParseTypeFullNameFromMethodFullName(methodFullName);
-        var type = LoadTypeByFullName(typeFullName, context);
+        var type = LoadTypeByFullName(typeFullName, context, assemblyName);
         var method = type.Methods.FirstOrDefault(x => x.FullName == methodFullName);
         if (method == null)
         {
@@ -43,9 +43,18 @@ public abstract class BaseDefinitionResolver
         return method;
     }
 
-    private TypeDefinition LoadTypeByFullName(string typeName, ResolverContext context = ResolverContext.All)
+    private TypeDefinition LoadTypeByFullName(string typeName, ResolverContext context = ResolverContext.All, string? assemblyName = null)
     {
-        var type = context switch
+        TypeDefinition? type;
+
+        // If an explicit assembly name is provided, try that first
+        if (!string.IsNullOrEmpty(assemblyName))
+        {
+            type = _module.ResolveInAssembly(typeName, assemblyName);
+            if (type != null) return type;
+        }
+
+        type = context switch
         {
             ResolverContext.All => _module.Resolve(typeName),
             ResolverContext.Internal => _module.ResolveInModule(typeName),
@@ -55,7 +64,8 @@ public abstract class BaseDefinitionResolver
         };
         if (type == null)
         {
-            throw new Exception($"Unable to resolve type {typeName} with context {context}");
+            throw new Exception($"Unable to resolve type {typeName} with context {context}" +
+                (assemblyName != null ? $" and assembly {assemblyName}" : ""));
         }
 
         return type;
@@ -94,12 +104,12 @@ public abstract class BaseDefinitionResolver
         }
         else if (property.PropertyType == typeof(TypeDefinition))
         {
-            var type = LoadTypeByFullName(attribute.FullName, attribute.Context);
+            var type = LoadTypeByFullName(attribute.FullName, attribute.Context, attribute.AssemblyName);
             property.SetValue(this, type);
         }
         else if (property.PropertyType == typeof(MethodDefinition))
         {
-            var method = LoadMethodByFullName(attribute.FullName, attribute.Context);
+            var method = LoadMethodByFullName(attribute.FullName, attribute.Context, attribute.AssemblyName);
             property.SetValue(this, method);
         }
     }
@@ -108,13 +118,13 @@ public abstract class BaseDefinitionResolver
         CecilResolveAttribute attribute
     )
     {
-        return () => LoadTypeByFullName(attribute.FullName, attribute.Context);
+        return () => LoadTypeByFullName(attribute.FullName, attribute.Context, attribute.AssemblyName);
     }
 
     private ILoadOnAccess<MethodDefinition>.LoaderDelegate MakeMethodDefinitionLoader(
         CecilResolveAttribute attribute
     )
     {
-        return () => LoadMethodByFullName(attribute.FullName, attribute.Context);
+        return () => LoadMethodByFullName(attribute.FullName, attribute.Context, attribute.AssemblyName);
     }
 }

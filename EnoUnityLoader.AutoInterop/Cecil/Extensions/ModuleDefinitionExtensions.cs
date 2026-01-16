@@ -46,6 +46,23 @@ public static class ModuleDefinitionExtensions
     }
 
     /// <summary>
+    /// Resolves a type from a specific assembly by name.
+    /// </summary>
+    public static TypeDefinition? ResolveInAssembly(this ModuleDefinition module, string typeFullName, string assemblyName)
+    {
+        try
+        {
+            var assemblyNameRef = new AssemblyNameReference(assemblyName, null);
+            var assembly = module.AssemblyResolver.Resolve(assemblyNameRef);
+            return assembly?.ResolveInAssembly(typeFullName);
+        }
+        catch (AssemblyResolutionException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Resolves a type by trying to resolve its assembly through the module's resolver.
     /// This method attempts to find the type in any assembly that can be resolved,
     /// including indirect dependencies.
