@@ -34,16 +34,21 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
+      - name: Restore EnoUnityLoader
         env:
           GITHUB_TOKEN: ${{ secrets.NUGET_GITHUB_TOKEN }}
-        run: dotnet restore
+        run: dotnet restore EnoUnityLoader/EnoUnityLoader.csproj
+
+      - name: Restore EnoUnityLoader.AutoInterop
+        env:
+          GITHUB_TOKEN: ${{ secrets.NUGET_GITHUB_TOKEN }}
+        run: dotnet restore EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj
 
       - name: Build EnoUnityLoader
-        run: dotnet build EnoUnityLoader/EnoUnityLoader.csproj -c ${{ env.CONFIGURATION }} --no-restore
+        run: dotnet build EnoUnityLoader/EnoUnityLoader.csproj -c ${{ env.CONFIGURATION }} --no-restore "-p:SolutionDir=${{ github.workspace }}/"
 
       - name: Build EnoUnityLoader.AutoInterop
-        run: dotnet build EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj -c ${{ env.CONFIGURATION }} --no-restore
+        run: dotnet build EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj -c ${{ env.CONFIGURATION }} --no-restore "-p:SolutionDir=${{ github.workspace }}/"
 
       - name: Get version from csproj
         id: get_version
