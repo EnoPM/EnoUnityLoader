@@ -1,0 +1,162 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [master, main]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a release'
+        required: false
+        default: 'true'
+        type: boolean
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      release_exists: ${{ steps.check_release.outputs.exists }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.NUGET_GITHUB_TOKEN }}
+        run: dotnet restore
+
+      - name: Build EnoUnityLoader
+        run: dotnet build EnoUnityLoader/EnoUnityLoader.csproj -c ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Build EnoUnityLoader.AutoInterop
+        run: dotnet build EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj -c ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Get version from csproj
+        id: get_version
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content "EnoUnityLoader/EnoUnityLoader.csproj"
+          $version = $csproj.Project.PropertyGroup.Version | Where-Object { $_ -ne $null } | Select-Object -First 1
+          if (-not $version) {
+            $version = "1.0.0"
+          }
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Detected version: $version"
+
+      - name: Create release structure
+        shell: pwsh
+        run: |
+          # Create directory structure
+          New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/core"
+          New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/patchers/plugins"
+          New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/mods"
+
+          # Copy EnoUnityLoader and all dependencies to core folder
+          $corePath = "EnoUnityLoader/bin/${{ env.CONFIGURATION }}/net10.0"
+          Get-ChildItem -Path $corePath -Filter "*.dll" | Copy-Item -Destination "release/EnoUnityLoader/core" -Force
+
+          # Copy runtimes folder if it exists
+          $runtimesPath = "$corePath/runtimes"
+          if (Test-Path $runtimesPath) {
+            Copy-Item -Path $runtimesPath -Destination "release/EnoUnityLoader/core/runtimes" -Recurse -Force
+          }
+
+          # Copy AutoInterop to patchers/plugins
+          Copy-Item -Path "EnoUnityLoader.AutoInterop/bin/${{ env.CONFIGURATION }}/net10.0/EnoUnityLoader.AutoInterop.dll" -Destination "release/EnoUnityLoader/patchers/plugins" -Force
+
+      - name: Extract additional files from archive
+        shell: pwsh
+        run: |
+          # Check if additional files archive exists
+          $archivePath = "release-extras.zip"
+          if (Test-Path $archivePath) {
+            echo "Found additional files archive, extracting..."
+            Expand-Archive -Path $archivePath -DestinationPath "release" -Force
+          } else {
+            echo "No additional files archive found at $archivePath"
+          }
+
+      - name: Create release archive
+        shell: pwsh
+        run: |
+          $version = "${{ steps.get_version.outputs.version }}"
+          Compress-Archive -Path "release/*" -DestinationPath "EnoUnityLoader-v$version.zip" -Force
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EnoUnityLoader-v${{ steps.get_version.outputs.version }}
+          path: EnoUnityLoader-v${{ steps.get_version.outputs.version }}.zip
+
+      - name: Check if release exists
+        id: check_release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = "${{ steps.get_version.outputs.version }}"
+          $tag = "v$version"
+          try {
+            $release = gh release view $tag 2>&1
+            if ($LASTEXITCODE -eq 0) {
+              echo "exists=true" >> $env:GITHUB_OUTPUT
+              echo "Release $tag already exists"
+            } else {
+              echo "exists=false" >> $env:GITHUB_OUTPUT
+              echo "Release $tag does not exist"
+            }
+          } catch {
+            echo "exists=false" >> $env:GITHUB_OUTPUT
+            echo "Release $tag does not exist"
+          }
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true') ||
+      (github.event_name == 'push' && needs.build.outputs.release_exists == 'false')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: EnoUnityLoader-v${{ needs.build.outputs.version }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          TAG="v$VERSION"
+
+          # Check if release already exists
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists, skipping creation"
+          else
+            echo "Creating release $TAG"
+            gh release create "$TAG" \
+              --title "EnoUnityLoader v$VERSION" \
+              --notes "Release of EnoUnityLoader version $VERSION" \
+              --draft=false \
+              "EnoUnityLoader-v$VERSION.zip"
+          fi
