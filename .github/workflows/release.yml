@@ -69,15 +69,9 @@ jobs:
           New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/patchers/plugins"
           New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/mods"
 
-          # Copy EnoUnityLoader and all dependencies to core folder
+          # Copy EnoUnityLoader and all dependencies to core folder (DLLs only, no runtimes)
           $corePath = "EnoUnityLoader/bin/${{ env.CONFIGURATION }}/net10.0"
           Get-ChildItem -Path $corePath -Filter "*.dll" | Copy-Item -Destination "release/EnoUnityLoader/core" -Force
-
-          # Copy runtimes folder if it exists
-          $runtimesPath = "$corePath/runtimes"
-          if (Test-Path $runtimesPath) {
-            Copy-Item -Path $runtimesPath -Destination "release/EnoUnityLoader/core/runtimes" -Recurse -Force
-          }
 
           # Copy AutoInterop to patchers/plugins
           Copy-Item -Path "EnoUnityLoader.AutoInterop/bin/${{ env.CONFIGURATION }}/net10.0/EnoUnityLoader.AutoInterop.dll" -Destination "release/EnoUnityLoader/patchers/plugins" -Force
