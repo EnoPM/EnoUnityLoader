@@ -12,6 +12,11 @@ public static class UiLauncher
     private static Process? _uiProcess;
 
     /// <summary>
+    /// Gets the last error message if LaunchUi failed.
+    /// </summary>
+    public static string? LastError { get; private set; }
+
+    /// <summary>
     /// Launches the UI application if not already running.
     /// </summary>
     /// <param name="loaderDirectory">Directory where the loader is installed (core folder).</param>
@@ -19,6 +24,8 @@ public static class UiLauncher
     /// <returns>True if launched or already running.</returns>
     public static bool LaunchUi(string loaderDirectory, int? gameProcessId = null)
     {
+        LastError = null;
+
         // Check if already running
         if (_uiProcess != null && !_uiProcess.HasExited)
         {
@@ -35,6 +42,7 @@ public static class UiLauncher
 
         if (!File.Exists(uiPath))
         {
+            LastError = $"UI executable not found. Searched: {Path.Combine(loaderDirectory, UiExecutableName)} and {Path.Combine(loaderDirectory, "ui", UiExecutableName)}";
             return false;
         }
 
@@ -53,10 +61,16 @@ public static class UiLauncher
             }
 
             _uiProcess = Process.Start(startInfo);
-            return _uiProcess != null;
+            if (_uiProcess == null)
+            {
+                LastError = "Process.Start returned null";
+                return false;
+            }
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
+            LastError = $"Failed to start UI process: {ex.Message}";
             return false;
         }
     }

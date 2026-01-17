@@ -38,7 +38,7 @@ public static class IpcManager
 
             if (!launched)
             {
-                Logger.Log(LogLevel.Warning, "Failed to launch UI application");
+                Logger.Log(LogLevel.Warning, $"Failed to launch UI application: {UiLauncher.LastError}");
                 return false;
             }
 
