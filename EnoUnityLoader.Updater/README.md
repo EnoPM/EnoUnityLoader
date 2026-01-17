@@ -6,9 +6,10 @@ Point d'entrée Doorstop qui gère les mises à jour automatiques avant de charg
 
 L'Updater est le premier assembly chargé par Doorstop. Il :
 1. Lance l'UI (splash screen)
-2. Vérifie s'il y a une mise à jour disponible sur GitHub
+2. Vérifie s'il y a une mise à jour d'EnoUnityLoader disponible sur GitHub
 3. Télécharge et applique la mise à jour si nécessaire
-4. Charge dynamiquement `EnoUnityLoader.dll` et appelle son point d'entrée
+4. Vérifie et met à jour les mods configurés dans `mods.yaml`
+5. Charge dynamiquement `EnoUnityLoader.dll` et appelle son point d'entrée
 
 ## Flux d'exécution
 
@@ -29,6 +30,9 @@ UpdateOrchestrator.RunAsync()
     ├── CheckAndApplyUpdatesAsync()
     │   ├── UpdateChecker.CheckForUpdateAsync()     # Vérifie GitHub API
     │   └── UpdateDownloader.DownloadAndApplyAsync() # Si mise à jour disponible
+    │
+    ├── CheckAndUpdateModsAsync()
+    │   └── ModManager.UpdateModsAsync()  # Met à jour les mods depuis mods.yaml
     │
     └── LoadAndRunLoader()
         ├── InitializeLoaderEnvVars()  # Initialise EnvVars d'EnoUnityLoader
@@ -92,11 +96,71 @@ EnoUnityLoader-v1.2.3.zip
 
 ### Fichiers ignorés lors de l'extraction
 
-| Fichier | Raison |
-|---------|--------|
+| Fichier                      | Raison                                  |
+|------------------------------|-----------------------------------------|
 | `EnoUnityLoader.Updater.dll` | En cours d'exécution (processus actuel) |
-| `EnoUnityLoader.Ipc.dll` | Chargé par l'Updater |
-| `EnoUnityLoader.Ui.exe` | En cours d'exécution (processus séparé) |
+| `EnoUnityLoader.Ipc.dll`     | Chargé par l'Updater                    |
+| `EnoUnityLoader.Ui.exe`      | En cours d'exécution (processus séparé) |
+| `YamlDotNet.dll`             | Chargé par l'Updater                    |
+
+## Gestion des mods
+
+L'Updater peut automatiquement télécharger et mettre à jour des mods depuis GitHub.
+
+### Configuration
+
+Créer un fichier `mods.yaml` à la racine du dossier EnoUnityLoader :
+
+```yaml
+mods:
+  - name: BetterVanilla
+    repo: EnoPM/BetterVanilla
+    mainAssembly: BetterVanilla.dll
+    enabled: true
+
+  - name: AnotherMod
+    repo: owner/repo-name
+    mainAssembly: AnotherMod.dll
+    enabled: false
+```
+
+### Propriétés
+
+| Propriété      | Description                                         |
+|----------------|-----------------------------------------------------|
+| `name`         | Nom du mod (utilisé comme nom de dossier)           |
+| `repo`         | Repository GitHub au format `owner/repo`            |
+| `mainAssembly` | Nom de la DLL principale (pour vérifier la version) |
+| `enabled`      | Active/désactive le téléchargement du mod           |
+
+### Fonctionnement
+
+1. L'Updater lit `mods.yaml`
+2. Pour chaque mod activé :
+   - Récupère la dernière release via l'API GitHub
+   - Compare la version de la release avec la version de `mainAssembly` installée
+   - Si une mise à jour est disponible, télécharge tous les assets `.dll`
+3. Les DLLs sont placées dans `EnoUnityLoader/mods/{name}/`
+
+### Structure des dossiers
+
+```
+EnoUnityLoader/
+├── mods.yaml
+├── core/
+└── mods/
+    ├── BetterVanilla/
+    │   └── BetterVanilla.dll
+    └── AnotherMod/
+        ├── AnotherMod.dll
+        └── AnotherMod.Dependency.dll
+```
+
+### Prérequis pour les releases GitHub
+
+Les releases des mods doivent :
+- Avoir un tag au format `vX.Y.Z` (ex: `v1.0.0`)
+- Contenir les fichiers `.dll` directement en tant qu'assets (pas dans un ZIP)
 
 ## Limitations actuelles
 
@@ -118,11 +182,11 @@ SendProgress("Loading", "Starting mod loader...");
 
 ## Variables d'environnement Doorstop utilisées
 
-| Variable | Description |
-|----------|-------------|
-| `DOORSTOP_INVOKE_DLL_PATH` | Chemin vers `EnoUnityLoader.Updater.dll` |
-| `DOORSTOP_PROCESS_PATH` | Chemin vers l'exécutable du jeu |
-| `DOORSTOP_MANAGED_FOLDER_DIR` | Dossier "Managed" du jeu |
+| Variable                      | Description                              |
+|-------------------------------|------------------------------------------|
+| `DOORSTOP_INVOKE_DLL_PATH`    | Chemin vers `EnoUnityLoader.Updater.dll` |
+| `DOORSTOP_PROCESS_PATH`       | Chemin vers l'exécutable du jeu          |
+| `DOORSTOP_MANAGED_FOLDER_DIR` | Dossier "Managed" du jeu                 |
 
 ## Chemins importants
 

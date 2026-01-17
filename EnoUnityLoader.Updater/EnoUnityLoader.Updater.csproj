@@ -9,15 +9,22 @@
         <!-- Keep the assembly small -->
         <DebugType>embedded</DebugType>
         <DebugSymbols>true</DebugSymbols>
+
+        <!-- Copy NuGet dependencies to output folder -->
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <PropertyGroup>
         <!-- This is the new Doorstop entry point -->
-        <CopyToCore>true</CopyToCore>
+        <CopyAllDependenciesToCore>true</CopyAllDependenciesToCore>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\EnoUnityLoader.Ipc\EnoUnityLoader.Ipc.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="YamlDotNet" Version="16.3.0" />
     </ItemGroup>
 
 </Project>

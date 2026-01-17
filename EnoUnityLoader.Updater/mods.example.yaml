@@ -1,0 +1,15 @@
+# EnoUnityLoader Mods Configuration
+# Place this file as 'mods.yaml' in the EnoUnityLoader folder
+
+mods:
+  # Example mod configuration
+  - name: BetterVanilla
+    repo: EnoPM/BetterVanilla
+    mainAssembly: BetterVanilla.dll
+    enabled: true
+
+  # Another example (disabled)
+  # - name: AnotherMod
+  #   repo: owner/repo-name
+  #   mainAssembly: AnotherMod.dll
+  #   enabled: false

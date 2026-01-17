@@ -128,7 +128,8 @@ internal sealed class UpdateDownloader : IDisposable
     [
         "EnoUnityLoader.Updater.dll",  // Currently executing
         "EnoUnityLoader.Ipc.dll",       // Loaded by updater
-        "EnoUnityLoader.Ui.exe"         // Running as separate process
+        "EnoUnityLoader.Ui.exe",        // Running as separate process
+        "YamlDotNet.dll"                // Loaded by updater
     ];
 
     private static bool IsLockedFile(string entryPath)

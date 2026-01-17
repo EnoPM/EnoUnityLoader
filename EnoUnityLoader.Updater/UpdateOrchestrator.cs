@@ -1,7 +1,7 @@
 using System.Reflection;
 using EnoUnityLoader.Ipc;
-using EnoUnityLoader.Ipc.Messages;
 using EnoUnityLoader.Updater.GitHub;
+using EnoUnityLoader.Updater.Mods;
 
 namespace EnoUnityLoader.Updater;
 
@@ -33,6 +33,7 @@ internal sealed class UpdateOrchestrator : IAsyncDisposable
         try
         {
             await CheckAndApplyUpdatesAsync();
+            await CheckAndUpdateModsAsync();
             LoadAndRunLoader();
         }
         finally
@@ -145,6 +146,33 @@ internal sealed class UpdateOrchestrator : IAsyncDisposable
         {
             SendProgress("Update failed", "Continuing with current version");
             await Task.Delay(1000);
+        }
+    }
+
+    private async Task CheckAndUpdateModsAsync()
+    {
+        var modLoaderRoot = EnvVars.GetModLoaderRoot();
+
+        using var modManager = new ModManager(modLoaderRoot);
+
+        modManager.OnProgress += (stage, description, progress) =>
+        {
+            SendProgress(stage, description, progress);
+        };
+
+        try
+        {
+            var updatedCount = await modManager.UpdateModsAsync();
+
+            if (updatedCount > 0)
+            {
+                SendProgress("Mods updated", $"{updatedCount} mod(s) updated");
+                await Task.Delay(300);
+            }
+        }
+        catch
+        {
+            // Continue even if mod updates fail
         }
     }
 
