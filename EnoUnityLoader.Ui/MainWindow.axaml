@@ -17,6 +17,7 @@
         Background="Transparent"
         Height="500" Width="450"
         Title="EnoUnityLoader"
+        Icon="{Binding AppIcon}"
         Topmost="True">
 
     <Window.Styles>
@@ -42,7 +43,7 @@
 
             <!-- Header -->
             <Image Grid.Row="0"
-                   Source="/Assets/EnoUnityLoaderLogo.png"
+                   Source="{Binding LogoSource}"
                    Height="320"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"

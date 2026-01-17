@@ -3,6 +3,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using EnoUnityLoader.Ipc;
 using EnoUnityLoader.Ipc.Messages;
@@ -75,6 +78,10 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     }
 
     public double LogoOpacity => IsConnected ? 1.0 : 0.5;
+
+    public Bitmap LogoSource { get; } = LoadLogo();
+
+    public WindowIcon AppIcon { get; } = LoadIcon();
 
     public ObservableCollection<LogEntry> Logs { get; }
 
@@ -261,6 +268,65 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     private static void RunOnUiThread(Action action)
     {
         Dispatcher.UIThread.Post(action);
+    }
+
+    /// <summary>
+    /// Loads the logo - either a custom logo from the icons folder or the default embedded resource.
+    /// </summary>
+    private static Bitmap LoadLogo()
+    {
+        // Try to load custom logo first
+        try
+        {
+            var customLogoPath = Path.Combine(AppContext.BaseDirectory, "icons", "logo.png");
+            if (File.Exists(customLogoPath))
+            {
+                return new Bitmap(customLogoPath);
+            }
+        }
+        catch
+        {
+            // Fall through to default
+        }
+
+        // Load default embedded resource
+        var uri = new Uri("avares://EnoUnityLoader.Ui/Assets/EnoUnityLoaderLogo.png");
+        using var stream = AssetLoader.Open(uri);
+        return new Bitmap(stream);
+    }
+
+    /// <summary>
+    /// Loads the window icon - either a custom icon from the icons folder or the default logo.
+    /// </summary>
+    private static WindowIcon LoadIcon()
+    {
+        // Try to load custom icon first (supports .ico and .png)
+        try
+        {
+            var iconsDir = Path.Combine(AppContext.BaseDirectory, "icons");
+
+            // Try .ico first, then .png
+            var icoPath = Path.Combine(iconsDir, "icon.ico");
+            if (File.Exists(icoPath))
+            {
+                return new WindowIcon(icoPath);
+            }
+
+            var pngPath = Path.Combine(iconsDir, "icon.png");
+            if (File.Exists(pngPath))
+            {
+                return new WindowIcon(pngPath);
+            }
+        }
+        catch
+        {
+            // Fall through to default
+        }
+
+        // Use the default logo as icon
+        var uri = new Uri("avares://EnoUnityLoader.Ui/Assets/EnoUnityLoaderIcon.png");
+        using var stream = AssetLoader.Open(uri);
+        return new WindowIcon(stream);
     }
 
     public async ValueTask DisposeAsync()

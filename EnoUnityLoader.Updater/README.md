@@ -162,6 +162,36 @@ Les releases des mods doivent :
 - Avoir un tag au format `vX.Y.Z` (ex: `v1.0.0`)
 - Contenir les fichiers `.dll` directement en tant qu'assets (pas dans un ZIP)
 
+## Personnalisation de l'UI
+
+### Logo et icône personnalisés
+
+Pour personnaliser l'apparence de l'interface de chargement, créez un dossier `icons` dans le dossier `ui/` :
+
+```
+EnoUnityLoader/
+├── core/
+│   └── ui/
+│       ├── EnoUnityLoader.Ui.exe
+│       └── icons/
+│           ├── logo.png    ← Logo affiché dans la fenêtre
+│           └── icon.png    ← Icône de la barre des tâches (ou icon.ico)
+└── ...
+```
+
+| Fichier    | Description                                        |
+|------------|----------------------------------------------------|
+| `logo.png` | Logo affiché au centre de la fenêtre de chargement |
+| `icon.png` | Icône affichée dans la barre des tâches            |
+| `icon.ico` | Alternative au format ICO (prioritaire sur PNG)    |
+
+Si ces fichiers n'existent pas, le logo par défaut d'EnoUnityLoader sera utilisé.
+
+**Recommandations :**
+- **Logo** : PNG avec transparence, hauteur recommandée 320px ou plus
+- **Icône** : PNG ou ICO, taille recommandée 256x256 pixels
+- Le fond de l'UI est sombre (#202020), privilégiez donc des couleurs claires
+
 ## Limitations actuelles
 
 1. **L'Updater ne peut pas se mettre à jour lui-même** : Puisque `EnoUnityLoader.Updater.dll` est en cours d'exécution, il est impossible de le remplacer.
