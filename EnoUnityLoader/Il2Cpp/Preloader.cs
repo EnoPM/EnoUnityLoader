@@ -4,12 +4,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using EnoUnityLoader.Console;
 using EnoUnityLoader.Il2Cpp.RuntimeFixes;
+using EnoUnityLoader.Ipc;
+using EnoUnityLoader.Ipc.Messages;
 using EnoUnityLoader.Logging;
 using EnoUnityLoader.Preloader;
 using EnoUnityLoader.Preloader.Patching;
 using EnoUnityLoader.Preloader.RuntimeFixes;
 using EnoUnityLoader.Unity;
 using AssemblyPatcher = EnoUnityLoader.Preloader.Patching.AssemblyPatcher;
+using LogLevel = EnoUnityLoader.Logging.LogLevel;
 
 namespace EnoUnityLoader.Il2Cpp;
 
@@ -55,6 +58,11 @@ public static class Preloader
 
             RedirectStdErrFix.Apply();
 
+            // Launch UI and connect via IPC
+            _ = IpcManager.InitializeAsync(Paths.ModLoaderAssemblyDirectory);
+            IpcManager.SendStatus(LoaderStatus.Initializing);
+            IpcManager.SendProgress("Initializing", "Starting mod loader...");
+
             ChainloaderLogHelper.PrintLogInfo(Log);
 
             Logger.Log(LogLevel.Info, $"Running under Unity {UnityInfo.Version}");
@@ -74,9 +82,16 @@ public static class Preloader
                 }
             }
 
+            IpcManager.SendProgress("Initializing", "Setting up IL2CPP interop...");
+
             NativeLibrary.SetDllImportResolver(typeof(Il2CppInterop.Runtime.IL2CPP).Assembly, DllImportResolver);
 
+            IpcManager.SendStatus(LoaderStatus.GeneratingInterop);
+            IpcManager.SendProgress("Generating Interop", "Initializing IL2CPP interop assemblies...");
+
             Il2CppInteropManager.Initialize();
+
+            IpcManager.SendProgress("Loading Assemblies", "Discovering patchers and assemblies...");
 
             using (var assemblyPatcher = new AssemblyPatcher((data, _) => Assembly.Load(data)))
             {
@@ -90,6 +105,8 @@ public static class Preloader
 
                 Log.LogInfo($"{assemblyPatcher.PatcherContext.AvailableAssemblies.Count} assemblies discovered");
 
+                IpcManager.SendProgress("Patching Assemblies", "Applying patches...");
+
                 assemblyPatcher.PatchAndLoad();
 
                 // Store loaded assemblies for chainloader to use
@@ -99,6 +116,8 @@ public static class Preloader
 
             Logger.Listeners.Remove(PreloaderLog);
 
+            IpcManager.SendStatus(LoaderStatus.LoadingMods);
+            IpcManager.SendProgress("Loading Mods", "Initializing chainloader...");
 
             Chainloader = new IL2CPPChainLoader();
 
@@ -107,6 +126,7 @@ public static class Preloader
         catch (Exception ex)
         {
             Log.Log(LogLevel.Fatal, ex);
+            IpcManager.SendReady(false, ex.Message);
 
             throw;
         }

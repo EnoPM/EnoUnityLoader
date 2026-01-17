@@ -43,11 +43,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.NUGET_GITHUB_TOKEN }}
         run: dotnet restore EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj
 
+      - name: Restore EnoUnityLoader.Ui
+        run: dotnet restore EnoUnityLoader.Ui/EnoUnityLoader.Ui.csproj
+
       - name: Build EnoUnityLoader
         run: dotnet build EnoUnityLoader/EnoUnityLoader.csproj -c ${{ env.CONFIGURATION }} --no-restore "-p:SolutionDir=${{ github.workspace }}/" -p:CopyToCore=false -p:CopyAllDependenciesToCore=false
 
       - name: Build EnoUnityLoader.AutoInterop
         run: dotnet build EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj -c ${{ env.CONFIGURATION }} --no-restore "-p:SolutionDir=${{ github.workspace }}/" -p:CopyToPluginsPatcher=false
+
+      - name: Publish EnoUnityLoader.Ui
+        run: dotnet publish EnoUnityLoader.Ui/EnoUnityLoader.Ui.csproj -c ${{ env.CONFIGURATION }} -p:CopyToUi=false
 
       - name: Get version from csproj
         id: get_version
@@ -66,6 +72,7 @@ jobs:
         run: |
           # Create directory structure
           New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/core"
+          New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/core/ui"
           New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/patchers/plugins"
           New-Item -ItemType Directory -Force -Path "release/EnoUnityLoader/mods"
 
@@ -75,6 +82,10 @@ jobs:
 
           # Copy AutoInterop to patchers/plugins
           Copy-Item -Path "EnoUnityLoader.AutoInterop/bin/${{ env.CONFIGURATION }}/net10.0/EnoUnityLoader.AutoInterop.dll" -Destination "release/EnoUnityLoader/patchers/plugins" -Force
+
+          # Copy UI executable to core/ui
+          $uiPublishPath = "EnoUnityLoader.Ui/bin/${{ env.CONFIGURATION }}/net10.0/win-x64/publish"
+          Copy-Item -Path "$uiPublishPath/EnoUnityLoader.Ui.exe" -Destination "release/EnoUnityLoader/core/ui" -Force
 
       - name: Extract additional files from archive
         shell: pwsh

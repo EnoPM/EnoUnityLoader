@@ -13,10 +13,12 @@
     <!-- Lire ModLoaderOutputPath depuis Directory.Build.props à la racine -->
     <ModLoaderOutputPath Condition="'$(ModLoaderOutputPath)' == ''">$(MSBuildThisFileDirectory)..\output\ModLoader</ModLoaderOutputPath>
     <CoreOutputPath Condition="'$(CoreOutputPath)' == ''">$(ModLoaderOutputPath)\core</CoreOutputPath>
+    <UiOutputPath Condition="'$(UiOutputPath)' == ''">$(CoreOutputPath)\ui</UiOutputPath>
     <ModsOutputPath Condition="'$(ModsOutputPath)' == ''">$(ModLoaderOutputPath)\mods</ModsOutputPath>
     <PluginsPatcherOutputPath Condition="'$(PluginsPatcherOutputPath)' == ''">$(ModLoaderOutputPath)\patchers\plugins</PluginsPatcherOutputPath>
     <CopyToMods Condition="'$(CopyToMods)' == ''">false</CopyToMods>
     <CopyToCore Condition="'$(CopyToCore)' == ''">false</CopyToCore>
+    <CopyToUi Condition="'$(CopyToUi)' == ''">false</CopyToUi>
     <CopyToPluginsPatcher Condition="'$(CopyToPluginsPatcher)' == ''">false</CopyToPluginsPatcher>
     <CopyAllDependenciesToCore Condition="'$(CopyAllDependenciesToCore)' == ''">false</CopyAllDependenciesToCore>
   </PropertyGroup>
@@ -59,6 +61,20 @@
     </ItemGroup>
     <Copy SourceFiles="@(DllsToCopy)" DestinationFolder="$(CoreOutputPath)" SkipUnchangedFiles="true" />
     <Message Importance="High" Text="Copied @(DllsToCopy->Count()) DLLs to $(CoreOutputPath)" />
+  </Target>
+
+  <!--
+    Copy UI exe to core/ui folder after publish.
+    Use CopyToUi=true on the UI project.
+    For single-file self-contained apps, this copies from the publish folder.
+  -->
+  <Target Name="CopyToUi" AfterTargets="Publish" Condition="'$(CopyToUi)' == 'true'">
+    <MakeDir Directories="$(UiOutputPath)" Condition="!Exists('$(UiOutputPath)')" />
+    <ItemGroup>
+      <UiFilesToCopy Include="$(PublishDir)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(UiFilesToCopy)" DestinationFolder="$(UiOutputPath)\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Message Importance="High" Text="Copied @(UiFilesToCopy->Count()) files to $(UiOutputPath)" />
   </Target>
 
 </Project>

@@ -11,9 +11,12 @@ using EnoUnityLoader.Attributes;
 using EnoUnityLoader.Configuration;
 using EnoUnityLoader.Console;
 using EnoUnityLoader.Contract;
+using EnoUnityLoader.Ipc;
+using EnoUnityLoader.Ipc.Messages;
 using EnoUnityLoader.Logging;
 using EnoUnityLoader.PluginPatching;
 using Mono.Cecil;
+using LogLevel = EnoUnityLoader.Logging.LogLevel;
 
 namespace EnoUnityLoader.Bootstrap;
 
@@ -362,10 +365,19 @@ public abstract partial class BaseChainLoader<TPlugin>
     {
         try
         {
+            IpcManager.SendProgress("Loading Mods", "Discovering plugins...");
+
             var plugins = DiscoverPlugins();
             Logger.Log(LogLevel.Info, $"{plugins.Count} plugin{(plugins.Count == 1 ? "" : "s")} to load");
+
+            IpcManager.SendProgress("Loading Mods", $"Found {plugins.Count} plugin(s)", -1, 0, plugins.Count);
+
             LoadPlugins(plugins);
             Finished?.Invoke();
+
+            IpcManager.SendStatus(LoaderStatus.Ready);
+            IpcManager.SendReady(true);
+            IpcManager.CloseUiDelayed(2000);
         }
         catch (Exception ex)
         {
@@ -376,6 +388,8 @@ public abstract partial class BaseChainLoader<TPlugin>
             catch { }
 
             Logger.Log(LogLevel.Error, $"Error occurred loading plugins: {ex}");
+            IpcManager.SendReady(false, ex.Message);
+            IpcManager.CloseUiDelayed(3000);
         }
 
         Logger.Log(LogLevel.Message, "Chainloader startup complete");
@@ -389,6 +403,9 @@ public abstract partial class BaseChainLoader<TPlugin>
         var processedPlugins = new Dictionary<string, SemanticVersioning.Version>();
         var loadedAssemblies = new Dictionary<string, Assembly>();
         var loadedPlugins = new List<PluginInfo>();
+
+        var totalPlugins = sortedPlugins.Count;
+        var currentPlugin = 0;
 
         foreach (var plugin in sortedPlugins)
         {
@@ -451,6 +468,10 @@ public abstract partial class BaseChainLoader<TPlugin>
 
             try
             {
+                currentPlugin++;
+                var progress = totalPlugins > 0 ? (double)currentPlugin / totalPlugins : -1;
+                IpcManager.SendProgress("Loading Mods", $"Loading {plugin.Metadata?.Name ?? plugin.TypeName}...", progress, currentPlugin, totalPlugins);
+
                 Logger.Log(LogLevel.Info, $"Loading [{plugin}]");
 
                 if (!loadedAssemblies.TryGetValue(plugin.Location, out var ass))
