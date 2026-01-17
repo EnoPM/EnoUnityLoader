@@ -16,11 +16,20 @@
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <PublishTrimmed>true</PublishTrimmed>
         <TrimMode>full</TrimMode>
+
+        <!-- Auto-publish on build (Release only) -->
+        <AutoPublishOnBuild Condition="'$(Configuration)' == 'Release'">true</AutoPublishOnBuild>
     </PropertyGroup>
 
     <PropertyGroup>
         <CopyToUi>true</CopyToUi>
     </PropertyGroup>
+
+    <!-- Publish automatically after build in Release mode -->
+    <Target Name="PublishAfterBuild" AfterTargets="Build" Condition="'$(AutoPublishOnBuild)' == 'true'">
+        <Message Importance="High" Text="Publishing EnoUnityLoader.Ui..." />
+        <Exec Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c $(Configuration) --no-build" />
+    </Target>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.0" />

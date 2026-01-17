@@ -52,7 +52,8 @@ public static class UiLauncher
             {
                 FileName = uiPath,
                 WorkingDirectory = Path.GetDirectoryName(uiPath),
-                UseShellExecute = true
+                UseShellExecute = false,  // Avoid SmartScreen blocking
+                CreateNoWindow = false
             };
 
             if (gameProcessId.HasValue)

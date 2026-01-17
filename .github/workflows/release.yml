@@ -87,9 +87,6 @@ jobs:
           $uiPublishPath = "EnoUnityLoader.Ui/bin/${{ env.CONFIGURATION }}/net10.0/win-x64/publish"
           Copy-Item -Path "$uiPublishPath/EnoUnityLoader.Ui.exe" -Destination "release/EnoUnityLoader/core/ui" -Force
 
-          # Remove Zone.Identifier to prevent SmartScreen blocking
-          Unblock-File -Path "release/EnoUnityLoader/core/ui/EnoUnityLoader.Ui.exe" -ErrorAction SilentlyContinue
-
       - name: Extract additional files from archive
         shell: pwsh
         run: |
