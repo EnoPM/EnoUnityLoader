@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <!-- Keep the assembly small -->
+        <DebugType>embedded</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- This is the new Doorstop entry point -->
+        <CopyToCore>true</CopyToCore>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\EnoUnityLoader.Ipc\EnoUnityLoader.Ipc.csproj" />
+    </ItemGroup>
+
+</Project>

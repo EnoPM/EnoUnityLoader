@@ -46,11 +46,17 @@ jobs:
       - name: Restore EnoUnityLoader.Ui
         run: dotnet restore EnoUnityLoader.Ui/EnoUnityLoader.Ui.csproj
 
+      - name: Restore EnoUnityLoader.Updater
+        run: dotnet restore EnoUnityLoader.Updater/EnoUnityLoader.Updater.csproj
+
       - name: Build EnoUnityLoader
         run: dotnet build EnoUnityLoader/EnoUnityLoader.csproj -c ${{ env.CONFIGURATION }} --no-restore "-p:SolutionDir=${{ github.workspace }}/" -p:CopyToCore=false -p:CopyAllDependenciesToCore=false
 
       - name: Build EnoUnityLoader.AutoInterop
         run: dotnet build EnoUnityLoader.AutoInterop/EnoUnityLoader.AutoInterop.csproj -c ${{ env.CONFIGURATION }} --no-restore "-p:SolutionDir=${{ github.workspace }}/" -p:CopyToPluginsPatcher=false
+
+      - name: Build EnoUnityLoader.Updater
+        run: dotnet build EnoUnityLoader.Updater/EnoUnityLoader.Updater.csproj -c ${{ env.CONFIGURATION }} --no-restore -p:CopyToCore=false
 
       - name: Publish EnoUnityLoader.Ui
         run: dotnet publish EnoUnityLoader.Ui/EnoUnityLoader.Ui.csproj -c ${{ env.CONFIGURATION }} -p:CopyToUi=false
@@ -86,6 +92,10 @@ jobs:
           # Copy UI executable to core/ui
           $uiPublishPath = "EnoUnityLoader.Ui/bin/${{ env.CONFIGURATION }}/net10.0/win-x64/publish"
           Copy-Item -Path "$uiPublishPath/EnoUnityLoader.Ui.exe" -Destination "release/EnoUnityLoader/core/ui" -Force
+
+          # Copy Updater to core folder
+          $updaterPath = "EnoUnityLoader.Updater/bin/${{ env.CONFIGURATION }}/net10.0"
+          Copy-Item -Path "$updaterPath/EnoUnityLoader.Updater.dll" -Destination "release/EnoUnityLoader/core" -Force
 
       - name: Extract additional files from archive
         shell: pwsh

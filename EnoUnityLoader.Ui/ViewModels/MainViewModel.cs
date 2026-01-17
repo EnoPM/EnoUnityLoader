@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Avalonia;
 using Avalonia.Threading;
 using EnoUnityLoader.Ipc;
 using EnoUnityLoader.Ipc.Messages;
@@ -10,6 +12,7 @@ namespace EnoUnityLoader.Ui.ViewModels;
 public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
 {
     private readonly IpcServer _ipcServer;
+    private readonly CancellationTokenSource _cts = new();
 
     public MainViewModel()
     {
@@ -78,6 +81,49 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
     public async Task StartAsync()
     {
         await _ipcServer.StartAsync();
+
+        // Start monitoring the game process if we have a PID
+        if (Program.GameProcessId.HasValue)
+        {
+            _ = MonitorGameProcessAsync(Program.GameProcessId.Value, _cts.Token);
+        }
+    }
+
+    private async Task MonitorGameProcessAsync(int processId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var process = Process.GetProcessById(processId);
+            await process.WaitForExitAsync(cancellationToken);
+
+            // Game has exited, close the UI
+            RunOnUiThread(() =>
+            {
+                if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    desktop.Shutdown();
+                }
+            });
+        }
+        catch (ArgumentException)
+        {
+            // Process doesn't exist (already exited), close UI
+            RunOnUiThread(() =>
+            {
+                if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    desktop.Shutdown();
+                }
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Monitoring was cancelled
+        }
+        catch
+        {
+            // Ignore other errors
+        }
     }
 
     private void HandleConnected()
@@ -219,6 +265,8 @@ public sealed class MainViewModel : INotifyPropertyChanged, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        await _cts.CancelAsync();
+        _cts.Dispose();
         await _ipcServer.DisposeAsync();
     }
 
