@@ -92,6 +92,7 @@ public class Il2CppSerializedFieldProcessor : BaseFieldProcessor<SerializedField
     private void AddDeserializationInstruction()
     {
         var il = Context.DeserializationMethod.Value.Body.GetILProcessor();
+        var methodBody = Context.DeserializationMethod.Value.Body;
         var interopGetMethod = Context.ProcessingModule.ImportReference(_interopFieldType.Value.Methods.First(x => x.Name == "Get"));
         if (_interopFieldType.Value.HasGenericParameters)
         {
@@ -100,18 +101,89 @@ public class Il2CppSerializedFieldProcessor : BaseFieldProcessor<SerializedField
             );
         }
 
-        il.Emit(OpCodes.Ldarg_0);
+        // Create a local variable to store the caught exception
+        var exceptionType = Context.ProcessingModule.ImportReference(typeof(System.Exception));
+        var exceptionLocal = new VariableDefinition(exceptionType);
+        methodBody.Variables.Add(exceptionLocal);
+
+        // Get the Exception constructor that takes (string message, Exception innerException)
+        var exceptionCtor = Context.ProcessingModule.ImportReference(
+            typeof(System.Exception).GetConstructor([typeof(string), typeof(System.Exception)]));
+
+        // Try block start
+        var tryStart = il.Create(OpCodes.Ldarg_0);
+        il.Append(tryStart);
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Ldfld, _serializedField.Value);
         il.Emit(OpCodes.Callvirt, interopGetMethod);
         if (_isPluginMonoBehaviourFieldType.Value)
         {
+            // Create local variables for activeSelf state and component
+            var boolType = Context.ProcessingModule.ImportReference(typeof(bool));
+            var activeSelfLocal = new VariableDefinition(boolType);
+            methodBody.Variables.Add(activeSelfLocal);
+
+            var componentLocal = new VariableDefinition(UsableField.FieldType);
+            methodBody.Variables.Add(componentLocal);
+
+            // Import the methods we need
+            var getActiveSelfMethod = Context.ProcessingModule.ImportReference(Context.InteropTypes.GameObjectGetActiveSelfMethod.Value);
+            var setActiveMethod = Context.ProcessingModule.ImportReference(Context.InteropTypes.GameObjectSetActiveMethod.Value);
+
             var getComponentMethod = new GenericInstanceMethod(Context.ProcessingModule.ImportReference(Context.InteropTypes.GameObjectGetComponentMethod.Value));
             getComponentMethod.GenericArguments.Add(UsableField.FieldType);
 
-            il.Emit(OpCodes.Callvirt, getComponentMethod);
+            // Stack: [this, GameObject]
+            // Save activeSelf state
+            il.Emit(OpCodes.Dup);                                            // [this, GameObject, GameObject]
+            il.Emit(OpCodes.Callvirt, (MethodReference)getActiveSelfMethod); // [this, GameObject, bool]
+            il.Emit(OpCodes.Stloc, activeSelfLocal);                         // [this, GameObject]
+
+            // Set GameObject active to true
+            il.Emit(OpCodes.Dup);                                            // [this, GameObject, GameObject]
+            il.Emit(OpCodes.Ldc_I4_1);                                       // [this, GameObject, GameObject, true]
+            il.Emit(OpCodes.Callvirt, (MethodReference)setActiveMethod);     // [this, GameObject]
+
+            // Call GetComponent and save result
+            il.Emit(OpCodes.Dup);                                            // [this, GameObject, GameObject]
+            il.Emit(OpCodes.Callvirt, getComponentMethod);                    // [this, GameObject, Component]
+            il.Emit(OpCodes.Stloc, componentLocal);                          // [this, GameObject]
+
+            // Restore original activeSelf state
+            il.Emit(OpCodes.Ldloc, activeSelfLocal);                         // [this, GameObject, bool]
+            il.Emit(OpCodes.Callvirt, (MethodReference)setActiveMethod);     // [this]
+
+            // Load the component for stfld
+            il.Emit(OpCodes.Ldloc, componentLocal);                          // [this, Component]
         }
         il.Emit(OpCodes.Stfld, UsableField);
+
+        // Leave try block
+        var endOfHandler = il.Create(OpCodes.Nop);
+        var leaveInstruction = il.Create(OpCodes.Leave, endOfHandler);
+        il.Append(leaveInstruction);
+
+        // Catch block start - exception is on stack
+        var catchStart = il.Create(OpCodes.Stloc, exceptionLocal);
+        il.Append(catchStart);
+        il.Emit(OpCodes.Ldstr, $"Unable to deserialize field '{_serializedFieldName}'");
+        il.Emit(OpCodes.Ldloc, exceptionLocal);
+        il.Emit(OpCodes.Newobj, exceptionCtor);
+        il.Emit(OpCodes.Throw);
+
+        // End of handler
+        il.Append(endOfHandler);
+
+        // Add exception handler
+        var handler = new ExceptionHandler(ExceptionHandlerType.Catch)
+        {
+            TryStart = tryStart,
+            TryEnd = catchStart,
+            HandlerStart = catchStart,
+            HandlerEnd = endOfHandler,
+            CatchType = exceptionType
+        };
+        methodBody.ExceptionHandlers.Add(handler);
     }
 
     private FieldDefinition CreateSerializedField()
