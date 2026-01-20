@@ -24,7 +24,11 @@ public class ModuleContext : AutoInteropContext, IModuleProcessorContext
     }
 
     protected ModuleContext(ModuleContext context)
-        : this(context, context.ProcessingAssembly)
+        : base(context)
     {
+        ProcessingAssembly = context.ProcessingAssembly;
+        ProcessingModule = context.ProcessingModule;
+        InteropTypes = context.InteropTypes;
+        GeneratedRuntime = context.GeneratedRuntime;
     }
 }

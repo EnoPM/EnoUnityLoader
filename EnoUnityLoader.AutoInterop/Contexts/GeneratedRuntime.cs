@@ -18,6 +18,7 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
     private readonly ModuleContext _context;
     private readonly Loadable<MethodDefinition> _pluginEntryPoint;
     private readonly Loadable<TypeDefinition> _componentRegistererType;
+    private bool _entryPointInjected;
     public Loadable<MethodDefinition> ComponentRegistererMethod { get; }
 
     public Loadable<MethodDefinition> SimpleComponentRegisterer { get; }
@@ -37,14 +38,23 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
 
     /// <summary>
     /// Generates the runtime infrastructure (type and registration methods) if they haven't been created yet.
+    /// Injects the call to RegisterCurrentPlugin at the top of the plugin entry point.
     /// </summary>
     public void GenerateRuntimeInfrastructure()
     {
+        if (_entryPointInjected)
+            return;
+
         // Force loading of all infrastructure components
         _componentRegistererType.Load();
         SimpleComponentRegisterer.Load();
         InterfaceComponentRegisterer.Load();
         ComponentRegistererMethod.Load();
+
+        // Inject the call to RegisterCurrentPlugin at the top of the plugin entry point
+        // This must be done after all component registrations have been added
+        CallInTopOfEntryPoint(ComponentRegistererMethod.Value);
+        _entryPointInjected = true;
     }
 
     private MethodDefinition CreateComponentRegistererMethod()
@@ -59,8 +69,6 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
 
         var il = method.Body.GetILProcessor();
         il.Emit(OpCodes.Ret);
-
-        CallInTopOfEntryPoint(method);
 
         return method;
     }

@@ -30,8 +30,11 @@ public class AutoInteropContext : IContext
     }
 
     protected AutoInteropContext(AutoInteropContext context)
-        : this(context.AssemblyFilePaths, context.Logger,
-               context.UseUnitySerializationInterface, context.UnityProjectDirectoryPath)
     {
+        AssemblyFilePaths = context.AssemblyFilePaths;
+        Logger = context.Logger;
+        UseUnitySerializationInterface = context.UseUnitySerializationInterface;
+        UnityProjectDirectoryPath = context.UnityProjectDirectoryPath;
+        InteropSummary = context.InteropSummary;
     }
 }

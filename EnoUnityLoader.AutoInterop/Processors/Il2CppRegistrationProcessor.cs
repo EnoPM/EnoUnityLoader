@@ -28,6 +28,8 @@ public class Il2CppRegistrationProcessor : BaseMonoBehaviourProcessor
         registererMethod.GenericArguments.Add(Context.ProcessingType);
 
         il.InsertBefore(ret, il.Create(OpCodes.Call, registererMethod));
+
+        Context.InteropSummary.RegisteredMonoBehaviourFullNames.Add(Context.ProcessingType.FullName);
     }
 
     private Loadable<MethodDefinition> GetBaseRegisterer()
