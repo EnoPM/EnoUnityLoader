@@ -211,6 +211,13 @@ public class PluginPatcherEngine : IDisposable
 
         try
         {
+            // Add cache directory to search paths so library dependencies are found
+            var cacheDir = Path.GetDirectoryName(cacheEntry.CachedAssemblyPath);
+            if (!string.IsNullOrEmpty(cacheDir))
+            {
+                ModLoaderAssemblyLoadContext.Default.AddSearchDirectory(cacheDir);
+            }
+
             assembly = ModLoaderAssemblyLoadContext.Default.LoadFromPath(cacheEntry.CachedAssemblyPath);
             LoadedPatchedAssemblies[pluginInfo.Location] = assembly;
             Logger.LogDebug($"Loaded cached patched plugin: {pluginInfo.Metadata?.Name}");
@@ -245,6 +252,9 @@ public class PluginPatcherEngine : IDisposable
             return null;
 
         Logger.LogInfo($"Patching plugin: {pluginInfo.Metadata?.Name} with {targetingPatchers.Count} patcher(s)");
+
+        // Set current plugin location in context for patchers to access
+        Context.CurrentPluginLocation = pluginInfo.Location;
 
         // Initialize patchers
         foreach (var patcher in targetingPatchers)
@@ -294,13 +304,28 @@ public class PluginPatcherEngine : IDisposable
         var patchedBytes = patchedStream.ToArray();
 
         // Save to cache if enabled
+        string? cachedPath = null;
         if (ConfigEnablePluginPatcherCache.Value)
         {
-            SaveToCache(pluginInfo, patchedBytes, originalHash, appliedPatchers, targetingPatchers);
+            cachedPath = SaveToCache(pluginInfo, patchedBytes, originalHash, appliedPatchers, targetingPatchers);
         }
 
-        // Load assembly
-        var assembly = Assembly.Load(patchedBytes);
+        // Add cache directory to search paths so library dependencies are found
+        Assembly assembly;
+        if (!string.IsNullOrEmpty(cachedPath))
+        {
+            var cacheDir = Path.GetDirectoryName(cachedPath);
+            if (!string.IsNullOrEmpty(cacheDir))
+            {
+                ModLoaderAssemblyLoadContext.Default.AddSearchDirectory(cacheDir);
+            }
+            // Load from cache path so dependencies are resolved from the same directory
+            assembly = ModLoaderAssemblyLoadContext.Default.LoadFromPath(cachedPath);
+        }
+        else
+        {
+            assembly = Assembly.Load(patchedBytes);
+        }
         LoadedPatchedAssemblies[pluginInfo.Location] = assembly;
 
         // Dump if configured
@@ -383,13 +408,15 @@ public class PluginPatcherEngine : IDisposable
     {
         try
         {
-            // Ensure cache directory exists
-            var pluginCacheDir = Path.Combine(Context.CachePath, pluginInfo.Metadata?.Guid ?? "unknown");
+            // Ensure cache directory exists - use plugin folder name to mirror source structure
+            var pluginFolderName = GetPluginFolderName(pluginInfo);
+            var pluginCacheDir = Path.Combine(Context.CachePath, pluginFolderName);
             if (!Directory.Exists(pluginCacheDir))
                 Directory.CreateDirectory(pluginCacheDir);
 
-            // Save patched assembly
-            var cachedPath = Path.Combine(pluginCacheDir, "patched.dll");
+            // Save patched assembly with original filename
+            var originalFileName = Path.GetFileName(pluginInfo.Location);
+            var cachedPath = Path.Combine(pluginCacheDir, originalFileName);
             File.WriteAllBytes(cachedPath, patchedBytes);
 
             // Create cache entry
@@ -500,6 +527,19 @@ public class PluginPatcherEngine : IDisposable
         CacheEntries.Clear();
         LoadedPatchedAssemblies.Clear();
         PatcherHashes.Clear();
+    }
+
+    /// <summary>
+    /// Gets the plugin folder name from the plugin location.
+    /// Used to create cache directories that mirror the source structure.
+    /// </summary>
+    private static string GetPluginFolderName(PluginInfo pluginInfo)
+    {
+        var pluginDir = Path.GetDirectoryName(pluginInfo.Location);
+        if (string.IsNullOrEmpty(pluginDir))
+            return pluginInfo.Metadata?.Guid ?? "unknown";
+
+        return Path.GetFileName(pluginDir);
     }
 
     #region Config

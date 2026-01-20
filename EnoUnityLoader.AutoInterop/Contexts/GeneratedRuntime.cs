@@ -18,11 +18,13 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
     private readonly ModuleContext _context;
     private readonly Loadable<MethodDefinition> _pluginEntryPoint;
     private readonly Loadable<TypeDefinition> _componentRegistererType;
+    private readonly Loadable<FieldDefinition> _isLastPassField;
     private bool _entryPointInjected;
     public Loadable<MethodDefinition> ComponentRegistererMethod { get; }
 
     public Loadable<MethodDefinition> SimpleComponentRegisterer { get; }
     public Loadable<MethodDefinition> InterfaceComponentRegisterer { get; }
+    public Loadable<MethodDefinition> RegisterAllTypesPassMethod { get; }
 
     public GeneratedRuntime(ModuleContext context) : base(context.ProcessingModule.Name)
     {
@@ -31,8 +33,10 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
         _pluginEntryPoint = new Loadable<MethodDefinition>(FindEntryPoint);
 
         _componentRegistererType = new Loadable<TypeDefinition>(CreateComponentRegistererType);
+        _isLastPassField = new Loadable<FieldDefinition>(CreateIsLastPassField);
         SimpleComponentRegisterer = new Loadable<MethodDefinition>(CreateSimpleComponentRegisterer);
         InterfaceComponentRegisterer = new Loadable<MethodDefinition>(CreateInterfaceComponentRegisterer);
+        RegisterAllTypesPassMethod = new Loadable<MethodDefinition>(CreateRegisterAllTypesPassMethod);
         ComponentRegistererMethod = new Loadable<MethodDefinition>(CreateComponentRegistererMethod);
     }
 
@@ -47,8 +51,10 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
 
         // Force loading of all infrastructure components
         _componentRegistererType.Load();
+        _isLastPassField.Load();
         SimpleComponentRegisterer.Load();
         InterfaceComponentRegisterer.Load();
+        RegisterAllTypesPassMethod.Load();
         ComponentRegistererMethod.Load();
 
         // Inject the call to RegisterCurrentPlugin at the top of the plugin entry point
@@ -68,6 +74,21 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
         _componentRegistererType.Value.Methods.Add(method);
 
         var il = method.Body.GetILProcessor();
+
+        // _isLastPass = false;
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Stsfld, _isLastPassField.Value);
+
+        // RegisterAllTypesPass(); (first pass - errors silently ignored)
+        il.Emit(OpCodes.Call, RegisterAllTypesPassMethod.Value);
+
+        // _isLastPass = true;
+        il.Emit(OpCodes.Ldc_I4_1);
+        il.Emit(OpCodes.Stsfld, _isLastPassField.Value);
+
+        // RegisterAllTypesPass(); (second pass - errors thrown)
+        il.Emit(OpCodes.Call, RegisterAllTypesPassMethod.Value);
+
         il.Emit(OpCodes.Ret);
 
         return method;
@@ -93,6 +114,11 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
             _context.ProcessingModule.ImportReference(_context.InteropTypes.RegisterTypeInIl2CppWithOptionsMethod.Value));
         registerer.GenericArguments.Add(genericParameter);
 
+        // IsTypeRegisteredInIl2Cpp<T>() check
+        var isRegistered = new GenericInstanceMethod(
+            _context.ProcessingModule.ImportReference(_context.InteropTypes.IsTypeRegisteredInIl2CppMethod.Value));
+        isRegistered.GenericArguments.Add(genericParameter);
+
         var registererOptionsConstructor = _context.ProcessingModule.ImportReference(
             _context.InteropTypes.ClassInjectorRegisterOptionsConstructor.Value);
         var registerOptionsSetInterfaceMethod = _context.ProcessingModule.ImportReference(
@@ -105,31 +131,84 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
         var interfaceCollectionConstructor = _context.ProcessingModule.ImportReference(
             _context.InteropTypes.Il2CppInterfaceCollectionConstructor.Value);
 
+        // Import required types for exception handling
+        var exceptionType = _context.ProcessingModule.ImportReference(_context.InteropTypes.SystemException.Value);
+        var typeGetFullName = _context.ProcessingModule.ImportReference(_context.InteropTypes.TypeGetFullNameMethod.Value);
+        var stringConcat = _context.ProcessingModule.ImportReference(_context.InteropTypes.StringConcatMethod.Value);
+        var invalidOpExCtor = _context.ProcessingModule.ImportReference(_context.InteropTypes.InvalidOperationExceptionConstructor.Value);
+
         var var0 = new VariableDefinition(
             _context.ProcessingModule.ImportReference(registererOptionsConstructor.DeclaringType));
         method.Body.Variables.Add(var0);
 
+        // Add local variable for caught exception
+        var exceptionVar = new VariableDefinition(exceptionType);
+        method.Body.Variables.Add(exceptionVar);
+        method.Body.InitLocals = true;
+
         var il = method.Body.GetILProcessor();
 
-        il.Emit(OpCodes.Newobj, registererOptionsConstructor);
-        il.Emit(OpCodes.Stloc_0);
+        // Create key instructions
+        var ret = il.Create(OpCodes.Ret);
+        var tryStart = il.Create(OpCodes.Newobj, registererOptionsConstructor);
+        var catchStart = il.Create(OpCodes.Stloc, exceptionVar);
+        var throwBlock = il.Create(OpCodes.Ldstr, "Failed to register type: ");
 
-        il.Emit(OpCodes.Ldloc_0);
-        il.Emit(OpCodes.Ldc_I4_1);
-        il.Emit(OpCodes.Newarr, systemType);
-        il.Emit(OpCodes.Dup);
-        il.Emit(OpCodes.Ldc_I4_0);
-        il.Emit(OpCodes.Ldtoken, serializationInterface);
-        il.Emit(OpCodes.Call, getTypeHandle);
-        il.Emit(OpCodes.Stelem_Ref);
+        // if (ClassInjector.IsTypeRegisteredInIl2Cpp<T>()) return;
+        il.Append(il.Create(OpCodes.Call, isRegistered));
+        il.Append(il.Create(OpCodes.Brtrue_S, ret));
 
-        il.Emit(OpCodes.Newobj, interfaceCollectionConstructor);
+        // try block: setup options and call registerer
+        il.Append(tryStart);
+        il.Append(il.Create(OpCodes.Stloc_0));
 
-        il.Emit(OpCodes.Callvirt, registerOptionsSetInterfaceMethod);
+        il.Append(il.Create(OpCodes.Ldloc_0));
+        il.Append(il.Create(OpCodes.Ldc_I4_1));
+        il.Append(il.Create(OpCodes.Newarr, systemType));
+        il.Append(il.Create(OpCodes.Dup));
+        il.Append(il.Create(OpCodes.Ldc_I4_0));
+        il.Append(il.Create(OpCodes.Ldtoken, serializationInterface));
+        il.Append(il.Create(OpCodes.Call, getTypeHandle));
+        il.Append(il.Create(OpCodes.Stelem_Ref));
 
-        il.Emit(OpCodes.Ldloc_0);
-        il.Emit(OpCodes.Call, registerer);
-        il.Emit(OpCodes.Ret);
+        il.Append(il.Create(OpCodes.Newobj, interfaceCollectionConstructor));
+
+        il.Append(il.Create(OpCodes.Callvirt, registerOptionsSetInterfaceMethod));
+
+        il.Append(il.Create(OpCodes.Ldloc_0));
+        il.Append(il.Create(OpCodes.Call, registerer));
+        il.Append(il.Create(OpCodes.Leave_S, ret));
+
+        // catch (Exception ex) {
+        il.Append(catchStart);
+        //   if (_isLastPass) throw new InvalidOperationException(...);
+        il.Append(il.Create(OpCodes.Ldsfld, _isLastPassField.Value));
+        il.Append(il.Create(OpCodes.Brtrue_S, throwBlock));
+        //   else return; (silently ignore on first pass)
+        il.Append(il.Create(OpCodes.Leave_S, ret));
+
+        // throw block
+        il.Append(throwBlock);
+        il.Append(il.Create(OpCodes.Ldtoken, genericParameter));
+        il.Append(il.Create(OpCodes.Call, getTypeHandle));
+        il.Append(il.Create(OpCodes.Callvirt, typeGetFullName));
+        il.Append(il.Create(OpCodes.Call, stringConcat));
+        il.Append(il.Create(OpCodes.Ldloc, exceptionVar));
+        il.Append(il.Create(OpCodes.Newobj, invalidOpExCtor));
+        il.Append(il.Create(OpCodes.Throw));
+
+        il.Append(ret);
+
+        // Add exception handler
+        var handler = new ExceptionHandler(ExceptionHandlerType.Catch)
+        {
+            TryStart = tryStart,
+            TryEnd = catchStart,
+            HandlerStart = catchStart,
+            HandlerEnd = ret,
+            CatchType = exceptionType
+        };
+        method.Body.ExceptionHandlers.Add(handler);
 
         _componentRegistererType.Value.Methods.Add(method);
 
@@ -156,14 +235,92 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
             _context.ProcessingModule.ImportReference(_context.InteropTypes.SimpleRegisterTypeInIl2CppMethod.Value));
         registerer.GenericArguments.Add(genericParameter);
 
+        // IsTypeRegisteredInIl2Cpp<T>() check
+        var isRegistered = new GenericInstanceMethod(
+            _context.ProcessingModule.ImportReference(_context.InteropTypes.IsTypeRegisteredInIl2CppMethod.Value));
+        isRegistered.GenericArguments.Add(genericParameter);
+
+        // Import required types for exception handling
+        var exceptionType = _context.ProcessingModule.ImportReference(_context.InteropTypes.SystemException.Value);
+        var getTypeFromHandle = _context.ProcessingModule.ImportReference(_context.InteropTypes.GetSystemTypeFromHandleMethod.Value);
+        var typeGetFullName = _context.ProcessingModule.ImportReference(_context.InteropTypes.TypeGetFullNameMethod.Value);
+        var stringConcat = _context.ProcessingModule.ImportReference(_context.InteropTypes.StringConcatMethod.Value);
+        var invalidOpExCtor = _context.ProcessingModule.ImportReference(_context.InteropTypes.InvalidOperationExceptionConstructor.Value);
+
+        // Add local variable for caught exception
+        var exceptionVar = new VariableDefinition(exceptionType);
+        method.Body.Variables.Add(exceptionVar);
+        method.Body.InitLocals = true;
 
         var il = method.Body.GetILProcessor();
-        il.Emit(OpCodes.Call, registerer);
-        il.Emit(OpCodes.Ret);
+
+        // Create key instructions
+        var ret = il.Create(OpCodes.Ret);
+        var tryStart = il.Create(OpCodes.Call, registerer);
+        var catchStart = il.Create(OpCodes.Stloc, exceptionVar);
+        var throwBlock = il.Create(OpCodes.Ldstr, "Failed to register type: ");
+
+        // if (ClassInjector.IsTypeRegisteredInIl2Cpp<T>()) return;
+        il.Append(il.Create(OpCodes.Call, isRegistered));
+        il.Append(il.Create(OpCodes.Brtrue_S, ret));
+
+        // try { ClassInjector.RegisterTypeInIl2Cpp<T>(); return; }
+        il.Append(tryStart);
+        il.Append(il.Create(OpCodes.Leave_S, ret));
+
+        // catch (Exception ex) {
+        il.Append(catchStart);
+        //   if (_isLastPass) throw new InvalidOperationException(...);
+        il.Append(il.Create(OpCodes.Ldsfld, _isLastPassField.Value));
+        il.Append(il.Create(OpCodes.Brtrue_S, throwBlock));
+        //   else return; (silently ignore on first pass)
+        il.Append(il.Create(OpCodes.Leave_S, ret));
+
+        // throw block
+        il.Append(throwBlock);
+        il.Append(il.Create(OpCodes.Ldtoken, genericParameter));
+        il.Append(il.Create(OpCodes.Call, getTypeFromHandle));
+        il.Append(il.Create(OpCodes.Callvirt, typeGetFullName));
+        il.Append(il.Create(OpCodes.Call, stringConcat));
+        il.Append(il.Create(OpCodes.Ldloc, exceptionVar));
+        il.Append(il.Create(OpCodes.Newobj, invalidOpExCtor));
+        il.Append(il.Create(OpCodes.Throw));
+
+        il.Append(ret);
+
+        // Add exception handler
+        var handler = new ExceptionHandler(ExceptionHandlerType.Catch)
+        {
+            TryStart = tryStart,
+            TryEnd = catchStart,
+            HandlerStart = catchStart,
+            HandlerEnd = ret,
+            CatchType = exceptionType
+        };
+        method.Body.ExceptionHandlers.Add(handler);
 
         _componentRegistererType.Value.Methods.Add(method);
 
         return method;
+    }
+
+    /// <summary>
+    /// Registers an external type (from a library) in the plugin's RegisterAllTypesPass method.
+    /// </summary>
+    public void RegisterExternalType(TypeReference typeReference, bool useSerializationInterface)
+    {
+        var passMethod = RegisterAllTypesPassMethod.Value;
+        var il = passMethod.Body.GetILProcessor();
+        var ret = il.Body.Instructions.First(x => x.OpCode == OpCodes.Ret);
+
+        var registererMethod = useSerializationInterface
+            ? InterfaceComponentRegisterer.Value
+            : SimpleComponentRegisterer.Value;
+
+        var genericMethod = new GenericInstanceMethod(_context.ProcessingModule.ImportReference(registererMethod));
+        genericMethod.GenericArguments.Add(_context.ProcessingModule.ImportReference(typeReference));
+
+        il.InsertBefore(ret, il.Create(OpCodes.Call, genericMethod));
     }
 
     private void CallInTopOfEntryPoint(MethodReference methodToCall)
@@ -184,6 +341,35 @@ public sealed class GeneratedRuntime : BaseRuntimeManager
         _context.ProcessingModule.Types.Add(type);
 
         return type;
+    }
+
+    private FieldDefinition CreateIsLastPassField()
+    {
+        var field = new FieldDefinition(
+            "_isLastPass",
+            FieldAttributes.Private | FieldAttributes.Static,
+            _context.ProcessingModule.TypeSystem.Boolean
+        );
+
+        _componentRegistererType.Value.Fields.Add(field);
+
+        return field;
+    }
+
+    private MethodDefinition CreateRegisterAllTypesPassMethod()
+    {
+        var method = new MethodDefinition(
+            "RegisterAllTypesPass",
+            MethodAttributes.Static | MethodAttributes.Private,
+            _context.ProcessingModule.TypeSystem.Void
+        );
+
+        _componentRegistererType.Value.Methods.Add(method);
+
+        var il = method.Body.GetILProcessor();
+        il.Emit(OpCodes.Ret);
+
+        return method;
     }
 
     private MethodDefinition FindEntryPoint()

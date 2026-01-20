@@ -18,8 +18,8 @@ public class Il2CppRegistrationProcessor : BaseMonoBehaviourProcessor
 
     public override void Process()
     {
-        var loader = Context.GeneratedRuntime.ComponentRegistererMethod.Value;
-        var il = loader.Body.GetILProcessor();
+        var passMethod = Context.GeneratedRuntime.RegisterAllTypesPassMethod.Value;
+        var il = passMethod.Body.GetILProcessor();
 
         var ret = il.Body.Instructions.First(x => x.OpCode == OpCodes.Ret);
 

@@ -21,4 +21,10 @@ public class PluginPatcherContext
     /// Path to the cache index file.
     /// </summary>
     public string CacheIndexPath { get; internal set; } = string.Empty;
+
+    /// <summary>
+    /// The file path of the plugin currently being patched.
+    /// Set by the engine before calling Patch() on each patcher.
+    /// </summary>
+    public string CurrentPluginLocation { get; internal set; } = string.Empty;
 }

@@ -31,4 +31,19 @@ public class ModuleContext : AutoInteropContext, IModuleProcessorContext
         InteropTypes = context.InteropTypes;
         GeneratedRuntime = context.GeneratedRuntime;
     }
+
+    /// <summary>
+    /// Creates a module context for a library assembly that shares the GeneratedRuntime with the plugin.
+    /// Used for processing library dependencies.
+    /// </summary>
+    /// <param name="pluginContext">The plugin's module context (provides GeneratedRuntime).</param>
+    /// <param name="libraryAssembly">The library assembly to process.</param>
+    public ModuleContext(ModuleContext pluginContext, AssemblyDefinition libraryAssembly)
+        : base(pluginContext)
+    {
+        ProcessingAssembly = libraryAssembly;
+        ProcessingModule = libraryAssembly.MainModule;
+        InteropTypes = new InteropTypesContext(ProcessingModule);
+        GeneratedRuntime = pluginContext.GeneratedRuntime; // Share the plugin's GeneratedRuntime
+    }
 }

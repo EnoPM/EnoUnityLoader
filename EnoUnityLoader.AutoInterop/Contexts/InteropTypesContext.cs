@@ -84,6 +84,21 @@ public sealed class InteropTypesContext : BaseDefinitionResolver
     [CecilResolve("System.Void UnityEngine.GameObject::SetActive(System.Boolean)")]
     internal LoadableMethod GameObjectSetActiveMethod { get; set; } = null!;
 
+    [CecilResolve("System.Exception", ResolverContext.Referenceable)]
+    internal LoadableType SystemException { get; set; } = null!;
+
+    [CecilResolve("System.String System.Type::get_FullName()", ResolverContext.Referenceable)]
+    internal LoadableMethod TypeGetFullNameMethod { get; set; } = null!;
+
+    [CecilResolve("System.String System.String::Concat(System.String,System.String)", ResolverContext.Referenceable)]
+    internal LoadableMethod StringConcatMethod { get; set; } = null!;
+
+    [CecilResolve("System.Void System.InvalidOperationException::.ctor(System.String,System.Exception)", ResolverContext.Referenceable)]
+    internal LoadableMethod InvalidOperationExceptionConstructor { get; set; } = null!;
+
+    [CecilResolve("System.Boolean Il2CppInterop.Runtime.Injection.ClassInjector::IsTypeRegisteredInIl2Cpp()", ResolverContext.Referenceable, "Il2CppInterop.Runtime")]
+    internal LoadableMethod IsTypeRegisteredInIl2CppMethod { get; set; } = null!;
+
     internal InteropTypesContext(ModuleDefinition module) : base(module)
     {
     }

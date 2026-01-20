@@ -29,7 +29,16 @@ internal static class UnityUtility
 
     private static List<TypeDefinition> ResolveMonoBehaviourDependencies(TypeDefinition type)
     {
-        return [type.BaseType.Resolve()];
+        var dependencies = new List<TypeDefinition>();
+
+        // Only base type dependency matters for IL2CPP registration order
+        var baseType = type.BaseType?.Resolve();
+        if (baseType != null)
+        {
+            dependencies.Add(baseType);
+        }
+
+        return dependencies;
     }
 
     private static bool IsSerializedField(InteropTypesContext interopTypes, FieldDefinition field)
