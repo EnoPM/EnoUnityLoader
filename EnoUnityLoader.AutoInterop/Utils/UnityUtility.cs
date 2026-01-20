@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using EnoUnityLoader.AutoInterop.Cecil.Extensions;
 using EnoUnityLoader.AutoInterop.Contexts;
 using EnoUnityLoader.AutoInterop.Core.Utils;
@@ -10,13 +11,15 @@ namespace EnoUnityLoader.AutoInterop.Utils;
 
 internal static class UnityUtility
 {
+
     internal static List<TypeDefinition> GetMonoBehaviourTypes(ModuleDefinition module, InteropTypesContext interopTypes)
     {
         var types = module.GetAllTypes()
             .Where(t => IsMonoBehaviour(interopTypes, t))
             .ToList();
 
-        var sorter = new TopologicalSorter<TypeDefinition>(types, ResolveMonoBehaviourDependencies);
+        var sorter = new TopologicalSorter<TypeDefinition>(types, CreateDependenciesResolver(interopTypes));
+
         return sorter.Sort();
     }
 
@@ -27,18 +30,30 @@ internal static class UnityUtility
             .ToList();
     }
 
-    private static List<TypeDefinition> ResolveMonoBehaviourDependencies(TypeDefinition type)
+    private static TopologicalSorter<TypeDefinition>.DependenciesResolver CreateDependenciesResolver(InteropTypesContext interopTypes)
     {
-        var dependencies = new List<TypeDefinition>();
-
-        // Only base type dependency matters for IL2CPP registration order
-        var baseType = type.BaseType?.Resolve();
-        if (baseType != null)
+        return type =>
         {
-            dependencies.Add(baseType);
-        }
+            var dependencies = new List<TypeDefinition>();
 
-        return dependencies;
+            // Only base type dependency matters for IL2CPP registration order
+            var baseType = type.BaseType?.Resolve();
+            if (baseType != null)
+            {
+                dependencies.Add(baseType);
+            }
+
+            foreach (var field in type.Fields)
+            {
+                var fieldType = field.FieldType.Resolve();
+                if (fieldType.FullName == type.FullName) continue;
+                if (!IsMonoBehaviour(interopTypes, fieldType)) continue;
+                if (fieldType.Module.Assembly.FullName != type.Module.Assembly.FullName) continue;
+                dependencies.Add(fieldType);
+            }
+
+            return dependencies;
+        };
     }
 
     private static bool IsSerializedField(InteropTypesContext interopTypes, FieldDefinition field)

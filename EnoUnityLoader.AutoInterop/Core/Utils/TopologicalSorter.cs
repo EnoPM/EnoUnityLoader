@@ -22,6 +22,8 @@ public sealed class TopologicalSorter<T> where T : notnull
                 .ToList();
         }
     }
+    
+    public Dictionary<T, List<T>> DependenciesMap => _dependenciesMap;
 
     public List<T> Sort()
     {
